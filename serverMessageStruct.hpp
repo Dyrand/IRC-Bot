@@ -19,6 +19,9 @@ struct serverMessageStruct
     std::string message  = "";
     std::string nickname = "";
 
+    int prefix_end_pos = std::string::npos;
+    int mes_start_pos  = std::string::npos;
+
     bool nick_flag = false; //used to note that channel name actually contains a nickname, e.g. /msg
 };
 

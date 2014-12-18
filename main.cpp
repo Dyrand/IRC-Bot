@@ -4,7 +4,7 @@
 
 int main()
 {
-    ircBotClass bot;
+    Bot bot;
 
     if(bot.connectToServer()==sf::Socket::Done)
     {

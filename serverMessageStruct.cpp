@@ -10,7 +10,11 @@ serverMessageStruct& serverMessageStruct::operator=(serverMessageStruct temp)
     channel   = temp.channel;
     message   = temp.message;
     nickname  = temp.nickname;
+    prefix_end_pos = temp.prefix_end_pos;
+    mes_start_pos  = temp.mes_start_pos;
     nick_flag = temp.nick_flag;
+
+    return *this;
 }
 
 void serverMessageStruct::reset()
@@ -23,6 +27,9 @@ void serverMessageStruct::reset()
     channel.clear();
     message.clear();
     nickname.clear();
+
+    prefix_end_pos = std::string::npos;
+    mes_start_pos  = std::string::npos;
 
     nick_flag = false;
 }
@@ -37,6 +44,7 @@ messageStruct& messageStruct::operator=(messageStruct temp)
     postfix   = temp.postfix;
 
     last_char_pos = temp.last_char_pos;
+    return *this;
 }
 
 void messageStruct::reset()

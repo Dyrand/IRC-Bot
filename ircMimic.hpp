@@ -5,13 +5,13 @@
 
 #include "serverMessageStruct.hpp"
 
-class ircBotClass;
+class Bot;
 
 //Includes demimic
 class ircMimic
 {
     public:
-    ircMimic(ircBotClass*);
+    ircMimic(Bot*);
 
     /*Core functions*/
     void mimic();
@@ -32,7 +32,7 @@ class ircMimic
 
     std::string pig_latin(std::string);
 
-    ircBotClass* bot;
+    Bot* bot;
 
     serverMessageStruct s_mes_struct;
     messageStruct         mes_struct;

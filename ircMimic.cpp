@@ -3,7 +3,7 @@
 
 #include "iostream"
 
-ircMimic::ircMimic(ircBotClass* tempBot)
+ircMimic::ircMimic(Bot* tempBot)
 {
     m_fs.pig_lat = false;
     m_fs.desc = false;

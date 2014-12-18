@@ -9,10 +9,10 @@
 
 // TODO (dyrand#4#12/15/2014): fun command, detects if there is fun
 
-class ircBotClass
+class Bot
 {
     public:
-    ircBotClass();
+    Bot();
 
     //Establishing Connections
     int connectToServer(std::string server, int port);
@@ -73,11 +73,11 @@ class ircBotClass
     bool npos_reached = false;
     bool mes_reached = false;
 
-    int rn_pos    = -1; // "\r\n"
-    int space_pos = -1; // " "
-    int col_pos   = -1; // ":"
-    int excl_pos  = -1; // "!"
-    int at_pos    = -1; // "@"
+    int rn_pos    = std::string::npos; // "\r\n"
+    int space_pos = std::string::npos; // " "
+    int col_pos   = std::string::npos; // ":"
+    int excl_pos  = std::string::npos; // "!"
+    int at_pos = std::string::npos;    // "&"
 
 
     sf::Socket::Status status;

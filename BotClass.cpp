@@ -8,23 +8,23 @@
 #include "BotClass.hpp"
 #include "serverMessageStruct.hpp"
 
-    const std::string ircBotClass::PONG("PONG");
-    const std::string ircBotClass::PING("PING");
-    const std::string ircBotClass::PASS("PASS");
-    const std::string ircBotClass::PRIVMSG("PRIVMSG");
-    const std::string ircBotClass::USER("USER");
-    const std::string ircBotClass::NICK("NICK");
-    const std::string ircBotClass::JOIN("JOIN");
-    const std::string ircBotClass::QUIT("QUIT");
+    const std::string Bot::PONG("PONG");
+    const std::string Bot::PING("PING");
+    const std::string Bot::PASS("PASS");
+    const std::string Bot::PRIVMSG("PRIVMSG");
+    const std::string Bot::USER("USER");
+    const std::string Bot::NICK("NICK");
+    const std::string Bot::JOIN("JOIN");
+    const std::string Bot::QUIT("QUIT");
 
-    const std::string ircBotClass::unused ("*");
-    const std::string ircBotClass::s(" ");
-    const std::string ircBotClass::c(":");
-    const std::string ircBotClass::rn("\r\n");
+    const std::string Bot::unused ("*");
+    const std::string Bot::s(" ");
+    const std::string Bot::c(":");
+    const std::string Bot::rn("\r\n");
 
-    const std::string ircBotClass::Dyrand("Dyrand");
+    const std::string Bot::Dyrand("Dyrand");
 
-ircBotClass::ircBotClass(): mimic_o(this)
+Bot::Bot(): mimic_o(this)
 {
     formated_text = "";
     receive_string = "";
@@ -60,14 +60,14 @@ ircBotClass::ircBotClass(): mimic_o(this)
     }
 }
 
-int ircBotClass::connectToServer(std::string server, int port)
+int Bot::connectToServer(std::string server, int port)
 {return statusSwitch(status = socket.connect(server,port));}
 
-int ircBotClass::connectToServer()
+int Bot::connectToServer()
 {return statusSwitch(status = socket.connect(server,port));}
 
 
-int ircBotClass::connectionRegistration()
+int Bot::connectionRegistration()
 {
     send(PASS+s+connection_password+rn);
     send(NICK+s+nickname+rn);
@@ -75,7 +75,7 @@ int ircBotClass::connectionRegistration()
     return status;
 }
 
-int ircBotClass::statusSwitch(int status)
+int Bot::statusSwitch(int status)
 {
     switch(status)
     {
@@ -100,7 +100,7 @@ int ircBotClass::statusSwitch(int status)
 }
 
 
-void ircBotClass::send(std::string formated_text)
+void Bot::send(std::string formated_text)
 {
     std::cout << formated_text;
     status = socket.send(formated_text.c_str(),formated_text.size());
@@ -108,7 +108,7 @@ void ircBotClass::send(std::string formated_text)
 
 //Using A TCPsocket, divide a message based on "\r\n" position, messages with out a "\r\n" at the end is regarded as
 //a partial string and saved for combining
-void ircBotClass::receive()
+void Bot::receive()
 {
     status = socket.receive(receive_text.data(),receive_text.size(),bytes_received);
     receive_string.assign(receive_text.begin(),receive_text.begin()+bytes_received);
@@ -143,20 +143,19 @@ void ircBotClass::receive()
 }
 
 
-void ircBotClass::join(std::string target_channel)
+void Bot::join(std::string target_channel)
 {send(JOIN+s+target_channel+rn);}
-void ircBotClass::join()
+void Bot::join()
 {send(JOIN+s+target_channel+rn);}
 
-void ircBotClass::privmsg(std::string channel, std::string message)
+void Bot::privmsg(std::string channel, std::string message)
 {send(PRIVMSG+s+channel+s+c+message+rn);}
 
 
-void ircBotClass::parserOfServerMessages()
+void Bot::parserOfServerMessages()
 {
 //<-----------prefix-----------> <command> <channel> :<message>
 //<nick|servername>!<username>@ <command> <channel> :<message>
-//jamie!jamie@127.0.0.1 PRIVMSG #Node.js :Hello! I was just  browsing for Node.js help, found this channel."
 //:Dyrand!~Dyrand@unaffiliated/dyrand PRIVMSG #botdever :9
 
 //<nick|servername>!<username>@ <command> :<message>
@@ -170,121 +169,82 @@ void ircBotClass::parserOfServerMessages()
 //ERROR :Closing Link: 127.0.0.1 (Connection timed out)
 //HYPOTHETICALMESSAGE  /*no space and no : or !
 
-    //Check if receive string is not just \r\n
-    if(receive_string.size() < 2)
-    {return;}
+    std::cout << receive_string;
 
+    if((rn_pos = receive_string.find("\r\n")) == std::string::npos)
+    {std::cout << "Receive string does not contain \"\\r\\n\".";}
 
-    //Check if string has at least one spaces
-    if(receive_string.find(s) == receive_string.npos)
+    //Gets the prefix if there is one
+    if(receive_string.front() == ':')
     {
-        s_mes_struct.prefix = receive_string;
-        return;
-    }
+        if((s_mes_struct.prefix_end_pos = receive_string.find(' ')) != std::string::npos)
+        {s_mes_struct.prefix = receive_string.substr(1,s_mes_struct.prefix_end_pos);}
+        else{std::cout << "Receive string does not contain a space.\n";}
+    }else{std::cout << "Receive string does not start with a ':'.\n";}
 
 
-    //Check if string begins with ':'
-    if(receive_string.at(0) != ':')
-    {
-        space_pos = receive_string.find(s);
-        rn_pos = receive_string.find(rn);
-        s_mes_struct.prefix = receive_string.substr(0,space_pos);
-        s_mes_struct.message = receive_string.substr(space_pos+1,(rn_pos-space_pos)-1); //substr includes colon
-        return;
-    }
-
-
-    //strip the ':'
+    //Gets the message if there is one
+    if((s_mes_struct.mes_start_pos = receive_string.find(" :")) != std::string::npos)
+    {s_mes_struct.message = receive_string.substr(s_mes_struct.mes_start_pos+2,(rn_pos-s_mes_struct.mes_start_pos)-2);}
     else
-    {receive_string.erase(receive_string.begin());}
-
-
-    //Check if the string has at least one colon after a space ,if not add "colon " :" just before "\r\n"
-    no_mes = false;
-    if(receive_string.find(" :") == receive_string.npos)
     {
-        receive_string.insert(receive_string.find(rn)," :");
-        no_mes = true;
+        std::cout << "Receive string does not contain a message.\n";
+        //padding for correctly getting the last block of text
+        receive_string.insert(rn_pos,s);
+        s_mes_struct.mes_start_pos = rn_pos;
     }
 
 
-    //Find all space in receive_string
-    npos_reached = false;
-    mes_reached  = false;
-    for(int i(0); (npos_reached == false) && (mes_reached == false); i++)
+    //Find all the spaces between prefix_end_pos and mes_start_pos
+    space_pos = s_mes_struct.prefix_end_pos;
+    while((space_pos = receive_string.find(' ',++space_pos)) < s_mes_struct.mes_start_pos)
+    {s_mes_struct.space_pos.emplace_back(space_pos);}
+
+    s_mes_struct.space_pos.emplace_back(s_mes_struct.mes_start_pos);
+
+    //Gets the command in the message, at least there should be one
+    s_mes_struct.command = receive_string.substr(s_mes_struct.prefix_end_pos+1,(s_mes_struct.space_pos.at(0)-s_mes_struct.prefix_end_pos)-1);
+
+
+    //Implies the 2nd thing after the message is a channel or nickname, both go to nickname var though
+    if(s_mes_struct.space_pos.size() >= 2)
+    {s_mes_struct.channel = receive_string.substr(s_mes_struct.space_pos.at(0)+1,s_mes_struct.space_pos.at(1)-s_mes_struct.space_pos.at(0));}
+
+    //Parse the prefix into nickname and username if possible
+    if((excl_pos = s_mes_struct.prefix.find('!')) != std::string::npos)
+    {s_mes_struct.nickname = s_mes_struct.prefix.substr(0,excl_pos);}
+    if((at_pos = s_mes_struct.prefix.find('@')) != std::string::npos)
     {
-        i = receive_string.find(s,i);
-
-        if(i != s_mes_struct.message.npos)
-        {
-            s_mes_struct.space_pos.push_back(i);
-            if(receive_string.at(i+1) == receive_string.at(col_pos = receive_string.find(c,i))) //Check if the character after the current space is a colon
-            {
-                s_mes_struct.message = receive_string.substr(col_pos+1,(receive_string.find(rn,i)-col_pos)-1);
-                mes_reached = true;
-            }
-        }
-        else
-        {npos_reached = true;}
-    }
-
-    //Use spaces found to divide message into parts
-    s_mes_struct.space_pos.emplace(s_mes_struct.space_pos.begin(),-1); //Added to substr the first piece of text in the loop
-
-    for(int i(0); i < s_mes_struct.space_pos.size()-1; i++)
-    {block_of_text.emplace_back(receive_string.substr(s_mes_struct.space_pos.at(i)+1,((s_mes_struct.space_pos.at(i+1)-s_mes_struct.space_pos.at(i))-1)));}
-
-    s_mes_struct.space_pos.erase(s_mes_struct.space_pos.begin()); //Used to restore vector back to it's original content
-
-
-    //Place content into it's correct place
-    if(block_of_text.size() > 0){s_mes_struct.prefix = block_of_text.at(0);}
-    if(block_of_text.size() > 1){s_mes_struct.command = block_of_text.at(1);}
-    if(block_of_text.size() > 2)
-    {
-        s_mes_struct.channel = block_of_text.at(2);
-        if(s_mes_struct.channel.find('#') == s_mes_struct.channel.npos) //Check if the channel string is actually a nickname
-        {s_mes_struct.nick_flag = true;}
-    }
-
-    //Parse prefix if possible
-    excl_pos = s_mes_struct.prefix.find("!");
-    at_pos = s_mes_struct.prefix.find("@");
-    if((excl_pos != s_mes_struct.prefix.npos) && (at_pos != s_mes_struct.prefix.npos))
-    {
-        {s_mes_struct.nickname = s_mes_struct.prefix.substr(0,excl_pos);}
         if(s_mes_struct.prefix.at(excl_pos+1) == '~')
-        {s_mes_struct.username = s_mes_struct.prefix.substr(excl_pos+2,((at_pos-excl_pos)-2));}
+        {s_mes_struct.username = s_mes_struct.prefix.substr(excl_pos+2,(at_pos-excl_pos)-2);}
         else
-        {s_mes_struct.username = s_mes_struct.prefix.substr(excl_pos+1,((at_pos-excl_pos)-1));}
+        {s_mes_struct.username = s_mes_struct.prefix.substr(excl_pos+1,(at_pos-excl_pos)-1);}
     }
 
-    if(no_mes == true)
-    {
-        //strip colon at end, added earlier for padding
-        receive_string.erase(receive_string.begin()+receive_string.rfind(c));
-        for(int i(2); i < (s_mes_struct.space_pos.size()-1) ; i++)
-        {s_mes_struct.args.emplace_back(receive_string.substr(s_mes_struct.space_pos.at(i)+1,((s_mes_struct.space_pos.at(i+1)-s_mes_struct.space_pos.at(i))-1)));}
-    }
+    //The rest of the stuff left between spaces is put into a string vector
+    for(int i(1); i < (s_mes_struct.space_pos.size()-1); i++)
+    {s_mes_struct.args.emplace_back(receive_string.substr(s_mes_struct.space_pos.at(i)+1,s_mes_struct.space_pos.at(i+1)-s_mes_struct.space_pos.at(i)));}
 
-    //std::cout << s_mes_struct.prefix << rn;
-    //std::cout << "command: " << s_mes_struct.command << rn;
-    //std::cout << "channel: " << s_mes_struct.channel << rn;
-    //std::cout << "message: " << s_mes_struct.message << rn+rn;
+    //std::cout << "prefix  :" << s_mes_struct.prefix   << rn;
+    //std::cout << "command :" << s_mes_struct.command  << rn;
+    //std::cout << "channel :" << s_mes_struct.channel  << rn;
+    //std::cout << "message :" << s_mes_struct.message  << rn;
+    //std::cout << "nickname:" << s_mes_struct.nickname << rn;
+    //std::cout << "username:" << s_mes_struct.username << rn;
 
     //for(int i(0); i < s_mes_struct.args.size(); i++)
-    //{std::cout << "Argument"<< i << ": " << s_mes_struct.args.at(i) << rn;}
+    //{std::cout << "Argument"<< i << ":" << s_mes_struct.args.at(i) << rn;}
 }
 
 
-void ircBotClass::postHandler()
+void Bot::postHandler()
 {
     if(mimic_o.mimicing())
     {mimic_o.mimic_handler();}
 }
 
 
-void ircBotClass::parserOfMessages()
+void Bot::parserOfMessages()
 {
     if(s_mes_struct.message.size() == 0)
     {return;}
@@ -339,12 +299,14 @@ void ircBotClass::parserOfMessages()
         {mes_struct.args.push_back(temp_string);}
     }
     mes_struct.space_pos.pop_back(); //Remove the space padding
+
+    //std::cout << "command:" << mes_struct.command << rn;
 }
 
 
-void ircBotClass::checkCommands()
+void Bot::checkCommands()
 {
-    if(mes_struct.command == "mimic" && s_mes_struct.command == PRIVMSG)
+    if(mes_struct.command == "mimic")
     {mimic_o.mimic();}
     else if(mes_struct.command == "demimic")
     {mimic_o.demimic();}
@@ -356,15 +318,15 @@ void ircBotClass::checkCommands()
     //{privmsg(s_mes_struct.channel,"That is not a command I know.");}
 }
 
-void ircBotClass::serverResponse()
+void Bot::serverResponse()
 {
-    if(s_mes_struct.prefix==PING)
+    if(s_mes_struct.command==PING)
     {send(PONG+s+s_mes_struct.message+rn);}
 }
 
 
 
-void ircBotClass::resetVars()
+void Bot::resetVars()
 {
     s_mes_struct.reset();
     mes_struct.reset();
@@ -372,7 +334,7 @@ void ircBotClass::resetVars()
 }
 
 
-void ircBotClass::loop()
+void Bot::loop()
 {
     do
     {
@@ -388,25 +350,25 @@ void ircBotClass::loop()
                     parserOfMessages();
                     if(mes_struct.command.size() != 0)
                     {checkCommands();}
+
                 }
-                else
-                {serverResponse();}
+                serverResponse();
+                postHandler();
+                resetVars();
             }
-            postHandler();
-            resetVars();
         }parsable_strings.clear();
     }while(stay_connected==true);
     send(QUIT+" :Ever want to look more like?"+rn);
     socket.disconnect();
 }
 
-void ircBotClass::disconnect()
+void Bot::disconnect()
 {
     if(s_mes_struct.nickname == Dyrand)
     {stay_connected = false;}
 }
 
-void ircBotClass::rawInput()
+void Bot::rawInput()
 {
     if((s_mes_struct.nickname == Dyrand) && (mes_struct.message.size() > 2))
     {
@@ -417,7 +379,7 @@ void ircBotClass::rawInput()
     {privmsg(s_mes_struct.channel,"\1ACTION tells "+s_mes_struct.nickname+" that the \">>\" command is only for: "+Dyrand+".\1");}
 }
 
-std::string ircBotClass::getNickname()
+std::string Bot::getNickname()
 {return nickname;}
 
 
