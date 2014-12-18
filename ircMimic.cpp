@@ -1,18 +1,14 @@
 #include "ircMimic.hpp"
-#include "BotClass.hpp"
+#include "Bot.hpp"
 
 #include "iostream"
 
-ircMimic::ircMimic(Bot* tempBot)
-{
-    m_fs.pig_lat = false;
-    m_fs.desc = false;
-    m_fs.edit = false;
+ircMimic::ircMimic(Bot* tempBot):
 
-    demimic_all = false;
+    demimic_all(false),
 
-    bot = tempBot;
-}
+    bot(tempBot)
+{}
 
 void ircMimic::mimic()
 {

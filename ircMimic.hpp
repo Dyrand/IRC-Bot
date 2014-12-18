@@ -11,48 +11,51 @@ class Bot;
 class ircMimic
 {
     public:
-    ircMimic(Bot*);
+        ircMimic(Bot*);
 
-    /*Core functions*/
-    void mimic();
-    void demimic();
-    void mimic_handler();
-    bool mimicing();
+        /*Core functions*/
+        void mimic();
+        void demimic();
+        void mimic_handler();
+        bool mimicing();
 
-    void mimic_description();
-    void demimic_description();
+        void mimic_description();
+        void demimic_description();
 
-    bool mim_check_conf_mods(); //checks if any mimic modifies conflict
-    void mim_mods_reset();      //resets modifiers to false
-    //bool demim_check_conf_mods(); //checks if any demimic modifies conflict
+        bool mim_check_conf_mods(); //checks if any mimic modifies conflict
+        void mim_mods_reset();      //resets modifiers to false
+        //bool demim_check_conf_mods(); //checks if any demimic modifies conflict
 
-    bool adjust_channel(); //replace channel with nickname if the channel var contains a nickname
+        bool adjust_channel(); //replace channel with nickname if the channel var contains a nickname
 
     private:
 
-    std::string pig_latin(std::string);
+        std::string pig_latin(std::string);
 
-    Bot* bot;
+        Bot* bot;
 
-    serverMessageStruct s_mes_struct;
-    messageStruct         mes_struct;
+        serverMessageStruct s_mes_struct;
+        messageStruct         mes_struct;
 
-    //Flags mimic
-    struct flags_m
-    {
-        bool pig_lat; //pig latin
-        bool desc;    //decription
-        bool edit;    //used to edit modifiers attached to currenct mimic
-    };
+        //Flags mimic
+        struct flags_m
+        {
+            flags_m():
+                pig_lat(false),
+                desc(false),
+                edit(false)
+            {}
+            bool pig_lat; //pig latin
+            bool desc;    //decription
+            bool edit;    //used to edit modifiers attached to currenct mimic
+        }m_fs;
 
-    flags_m m_fs; //mimic flags
+        //Flags demimic
+        bool demimic_all;
+        bool demim_desc;
 
-    //Flags demimic
-    bool demimic_all;
-    bool demim_desc;
-
-    std::vector<std::string> nicks_mimic; //nicknames that are being mimiced
-    std::map<std::string,flags_m> nick_map;
+        std::vector<std::string> nicks_mimic; //nicknames that are being mimiced
+        std::map<std::string,flags_m> nick_map;
 
 };
 

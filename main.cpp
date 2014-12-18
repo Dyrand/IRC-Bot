@@ -1,6 +1,6 @@
 #include <SFML/Network.hpp>
 
-#include "BotClass.hpp"
+#include "Bot.hpp"
 
 int main()
 {
