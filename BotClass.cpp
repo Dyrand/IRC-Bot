@@ -37,7 +37,7 @@ Bot::Bot(): mimic_o(this)
     if((userInput=="d") || (userInput=="D") || (userInput=="default"))
     {
         connection_password = "op10";
-        nickname = "Dyramic";
+        nickname = "Dyramic_v2";
         username = "dyramic";
         realname = "dyramic";
         mode     = "0";
@@ -49,7 +49,7 @@ Bot::Bot(): mimic_o(this)
     else
     {
         connection_password = "op10";
-        nickname = "Dyramic";
+        nickname = "Dyramic_v2";
         username = "dyramic";
         realname = "dyramic";
         mode     = "0";
@@ -330,7 +330,6 @@ void Bot::resetVars()
 {
     s_mes_struct.reset();
     mes_struct.reset();
-    block_of_text.clear();
 }
 
 

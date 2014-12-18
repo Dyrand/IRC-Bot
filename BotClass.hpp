@@ -43,7 +43,7 @@ class Bot
     void disconnect();
     void rawInput();
 
-    /*Object for commands*/
+    /*Objects for commands*/
     ircMimic mimic_o;
 
 
@@ -60,24 +60,18 @@ class Bot
 
     long unsigned int bytes_received;
     std::array<char,512> receive_text;
-    std::string receive_string;
-
-    std::vector<std::string> block_of_text; //rename
     std::vector<std::string> parsable_strings;
+    std::string receive_string;
 
     std::string partial_string;
     std::string temp_string;
 
     bool partial_flag = false;
-    bool no_mes = false;
-    bool npos_reached = false;
-    bool mes_reached = false;
 
     int rn_pos    = std::string::npos; // "\r\n"
     int space_pos = std::string::npos; // " "
-    int col_pos   = std::string::npos; // ":"
     int excl_pos  = std::string::npos; // "!"
-    int at_pos = std::string::npos;    // "&"
+    int at_pos = std::string::npos;    // "@"
 
 
     sf::Socket::Status status;
