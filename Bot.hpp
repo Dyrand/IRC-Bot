@@ -1,0 +1,103 @@
+#ifndef BOT_CLASS_HPP
+#define BOT_CLASS_HPP
+
+#include <SFML/Network.hpp>
+
+#include "serverMessageStruct.hpp"
+#include "ircMimic.hpp"
+#include "ircConsts.hpp"
+
+
+// TODO (dyrand#4#12/15/2014): fun command, detects if there is fun
+
+class Bot
+{
+    public:
+        //using namespace irc;
+
+        Bot();
+
+        //Establishing Connections
+        int connectToServer(std::string server, int port);
+        int connectToServer();
+        int connectionRegistration();
+
+        //Outputs text depending on what staus is
+        int statusSwitch(int status);
+
+        //Send and Receive
+        void send(std::string formated_text);
+        void receive();
+
+        //Basic IRC commands
+        void privmsg(std::string channel, std::string message);
+        void join(std::string target_channel);
+        void join();
+
+        void parserOfServerMessages();
+        void postHandler();
+        void parserOfMessages();
+        void checkCommands();
+        void serverResponse();
+        void resetVars();
+        void loop();
+
+        /*Simple Commands*/ //most likely can remain in ircBotClass
+        void disconnect();
+        void rawInput();
+
+        /*Objects for commands*/
+        ircMimic mimic_o;
+
+
+        serverMessageStruct s_mes_struct; //server_message_struct
+        messageStruct         mes_struct; //message_struct
+
+        /*Get functions*/
+        std::string getNickname();
+
+    private:
+
+        bool stay_connected;
+
+
+        long unsigned int bytes_received;
+        std::array<char,512> receive_text;
+        std::vector<std::string> parsable_strings;
+        std::string receive_string;
+
+        std::string partial_string;
+        std::string temp_string;
+
+        bool partial_flag = false;
+
+        int rn_pos    = std::string::npos; // "\r\n"
+        int space_pos = std::string::npos; // " "
+        int excl_pos  = std::string::npos; // "!"
+        int at_pos    = std::string::npos; // "@"
+
+
+        sf::Socket::Status status;
+        sf::TcpSocket      socket;
+
+
+        std::string connection_password;
+        std::string nickname;
+        std::string username;
+        std::string realname;
+        std::string mode;
+
+
+        std::string formated_text;
+        std::string target_channel;
+        std::string server;
+        int port;
+
+        //Dyrand
+        const std::string Dyrand = "Dyrand";
+};
+
+
+
+#endif // BOT_CLASS_HPP
+

@@ -5,70 +5,22 @@
 
 #include <SFML/Network.hpp>
 
-#include "BotClass.hpp"
+#include "Bot.hpp"
 #include "serverMessageStruct.hpp"
 
-    const std::string Bot::PONG("PONG");
-    const std::string Bot::PING("PING");
-    const std::string Bot::PASS("PASS");
-    const std::string Bot::PRIVMSG("PRIVMSG");
-    const std::string Bot::USER("USER");
-    const std::string Bot::NICK("NICK");
-    const std::string Bot::JOIN("JOIN");
-    const std::string Bot::QUIT("QUIT");
 
-    const std::string Bot::unused ("*");
-    const std::string Bot::s(" ");
-    const std::string Bot::c(":");
-    const std::string Bot::rn("\r\n");
-
-    const std::string Bot::Dyrand("Dyrand");
-
-Bot::Bot(): mimic_o(this)
-{
-    formated_text = "";
-    receive_string = "";
-    stay_connected = true;
-    partial_string = "";
-
-    std::string userInput;
-    std::cout << "Use default settings for the bot or custom?\n";
-    std::getline(std::cin,userInput);
-    if((userInput=="d") || (userInput=="D") || (userInput=="default"))
-    {
-        connection_password = "password";
-        nickname = "Dyramic";
-        username = "dyramic";
-        realname = "dyramic";
-        mode     = "0";
-
-        target_channel  = "#botdever";
-        server   = "irc.freenode.com";
-        port     = 8001;
-    }
-    else
-    {
-        std::cout << "What should the connection password be?\n";
-        std::getline(std::cin,connection_password);
-        std::cout << "What should the nickname be?\n";
-        std::getline(std::cin,nickname);
-        std::cout << "What should the username be?\n";
-        std::getline(std::cin,username);
-        std::cout << "What should the realname be?\n";
-        std::getline(std::cin,realname);
-        std::cout << "What should the mode be?\n";
-        std::getline(std::cin,mode);
-        std::cout << "What server should be joined?\n";
-        std::getline(std::cin,server);
-        std::cout << "What port should be used?\n";
-        std::cin >> port;
-        std::cin.ignore(100,'\n');
-        std::cout << "What should be the first channel joined?\n";
-        std::getline(std::cin,target_channel);
-        std::cout << "What identifier should be used?\n";
-        std::cin.get(mes_struct.ident);
-    }
-}
+Bot::Bot():
+    mimic_o(this),
+    stay_connected(true),
+    connection_password("password"),
+    nickname("Dyramic"),
+    username("dyramic"),
+    realname("dyramic"),
+    mode("0"),
+    target_channel("#botdever"),
+    server("irc.freenode.com"),
+    port(8001)
+{}
 
 int Bot::connectToServer(std::string server, int port)
 {return statusSwitch(status = socket.connect(server,port));}
@@ -79,9 +31,10 @@ int Bot::connectToServer()
 
 int Bot::connectionRegistration()
 {
-    send(PASS+s+connection_password+rn);
-    send(NICK+s+nickname+rn);
-    send(USER+s+username+s+mode+s+unused+s+c+realname+rn);
+    using namespace irc;
+    send(PASS+s+connection_password);
+    send(NICK+s+nickname);
+    send(USER+s+username+s+mode+s+unused+s+c+realname);
     return status;
 }
 
@@ -112,6 +65,8 @@ int Bot::statusSwitch(int status)
 
 void Bot::send(std::string formated_text)
 {
+    using namespace irc;
+    formated_text.append(rn);
     std::cout << formated_text;
     status = socket.send(formated_text.c_str(),formated_text.size());
 }
@@ -120,6 +75,8 @@ void Bot::send(std::string formated_text)
 //a partial string and saved for combining
 void Bot::receive()
 {
+    using namespace irc;
+
     status = socket.receive(receive_text.data(),receive_text.size(),bytes_received);
     receive_string.assign(receive_text.begin(),receive_text.begin()+bytes_received);
 
@@ -154,12 +111,23 @@ void Bot::receive()
 
 
 void Bot::join(std::string target_channel)
-{send(JOIN+s+target_channel+rn);}
+{
+    using namespace irc;
+    send(JOIN+" "+target_channel);
+}
+
 void Bot::join()
-{send(JOIN+s+target_channel+rn);}
+{
+    using namespace irc;
+    send(JOIN+" "+target_channel);
+}
 
 void Bot::privmsg(std::string channel, std::string message)
-{send(PRIVMSG+s+channel+s+c+message+rn);}
+{
+    using namespace irc;
+    send(PRIVMSG+" "+channel+" "+" :"+message);
+}
+
 
 
 void Bot::parserOfServerMessages()
@@ -178,6 +146,8 @@ void Bot::parserOfServerMessages()
 
 //ERROR :Closing Link: 127.0.0.1 (Connection timed out)
 //HYPOTHETICALMESSAGE  /*no space and no : or !
+
+    using namespace irc;
 
     std::cout << receive_string;
 
@@ -330,6 +300,7 @@ void Bot::checkCommands()
 
 void Bot::serverResponse()
 {
+    using namespace irc;
     if(s_mes_struct.command==PING)
     {send(PONG+s+s_mes_struct.message+rn);}
 }
@@ -345,6 +316,7 @@ void Bot::resetVars()
 
 void Bot::loop()
 {
+    using namespace irc;
     do
     {
         receive();
@@ -377,6 +349,7 @@ void Bot::disconnect()
 
 void Bot::rawInput()
 {
+    using namespace irc;
     if((s_mes_struct.nickname == Dyrand) && (mes_struct.message.size() > 2))
     {
     mes_struct.postfix = mes_struct.message.substr(3,mes_struct.last_char_pos-1);
