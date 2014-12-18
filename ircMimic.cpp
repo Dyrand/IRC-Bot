@@ -152,7 +152,7 @@ void ircMimic::mimic_handler()
     s_mes_struct = bot->s_mes_struct;
     adjust_channel();
 
-    if(s_mes_struct.message.at(0)!='>')
+    if(s_mes_struct.message.at(0)!=mes_struct.ident)
     {
         if(std::find(nicks_mimic.begin(), nicks_mimic.end(),s_mes_struct.nickname) != nicks_mimic.end())
         {

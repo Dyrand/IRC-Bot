@@ -40,7 +40,7 @@ struct messageStruct
 
     int last_char_pos=0;
 
-    const char ident = '>';
+    char ident = '>';
     const char minu  = '-';
     const char plu   = '+';
 };

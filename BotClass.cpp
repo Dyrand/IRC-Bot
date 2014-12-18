@@ -36,8 +36,8 @@ Bot::Bot(): mimic_o(this)
     std::getline(std::cin,userInput);
     if((userInput=="d") || (userInput=="D") || (userInput=="default"))
     {
-        connection_password = "op10";
-        nickname = "Dyramic_v2";
+        connection_password = "password";
+        nickname = "Dyramic";
         username = "dyramic";
         realname = "dyramic";
         mode     = "0";
@@ -48,15 +48,25 @@ Bot::Bot(): mimic_o(this)
     }
     else
     {
-        connection_password = "op10";
-        nickname = "Dyramic_v2";
-        username = "dyramic";
-        realname = "dyramic";
-        mode     = "0";
-
-        target_channel  = "#botdever";
-        server   = "irc.freenode.com";
-        port     = 8001;
+        std::cout << "What should the connection password be?\n";
+        std::getline(std::cin,connection_password);
+        std::cout << "What should the nickname be?\n";
+        std::getline(std::cin,nickname);
+        std::cout << "What should the username be?\n";
+        std::getline(std::cin,username);
+        std::cout << "What should the realname be?\n";
+        std::getline(std::cin,realname);
+        std::cout << "What should the mode be?\n";
+        std::getline(std::cin,mode);
+        std::cout << "What server should be joined?\n";
+        std::getline(std::cin,server);
+        std::cout << "What port should be used?\n";
+        std::cin >> port;
+        std::cin.ignore(100,'\n');
+        std::cout << "What should be the first channel joined?\n";
+        std::getline(std::cin,target_channel);
+        std::cout << "What identifier should be used?\n";
+        std::cin.get(mes_struct.ident);
     }
 }
 
