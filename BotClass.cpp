@@ -246,61 +246,61 @@ void Bot::postHandler()
 
 void Bot::parserOfMessages()
 {
-    if(s_mes_struct.message.size() == 0)
+    //Check if message is empty
+    if(s_mes_struct.message.empty())
     {return;}
 
     mes_struct.message = s_mes_struct.message;
     mes_struct.last_char_pos = mes_struct.message.length()-1;
 
+    //Check if the message has the identifier for a command, stored in mes_struct.ident
     if(mes_struct.message.at(0) != mes_struct.ident)
     {return;}
 
     //Find the spaces within the message
-    bool npos_reached = false;
-    for(int i(0); npos_reached == false; i++)
-    {
-        i = mes_struct.message.find(s,i);
-        if(i != mes_struct.message.npos)
-        {mes_struct.space_pos.push_back(i);}
-        else
-        {npos_reached = true;}
-    }
+    space_pos = 0;
+    while((space_pos = mes_struct.message.find(' ',++space_pos)) != std::string::npos)
+    {mes_struct.space_pos.emplace_back(space_pos);}
 
-    //Space for the end, makes the following statements work
-    mes_struct.space_pos.push_back(mes_struct.space_pos.size());
+    //Adds a padding space for the end of the message for substr
+    mes_struct.space_pos.emplace_back(mes_struct.space_pos.size());
 
     //Simple substr to get command
-    mes_struct.command = mes_struct.message.substr(1,(mes_struct.space_pos[0]-1));
+    mes_struct.command = mes_struct.message.substr(1,(mes_struct.space_pos.at(0)-1));
 
     bool modifier_present = true;
     int i(0);
     //Parsing modifiers
     for(; (i < (mes_struct.space_pos.size()-1)) & modifier_present; i++)
     {
-        temp_string = mes_struct.message.substr(mes_struct.space_pos[i]+1,((mes_struct.space_pos[i+1]-mes_struct.space_pos[i])-1));
+        temp_string = mes_struct.message.substr(mes_struct.space_pos.at(i)+1,((mes_struct.space_pos.at(i+1)-mes_struct.space_pos.at(i)))-1);
 
-        if(temp_string.size() != 0)
+        if(!temp_string.empty())
         {
             if(temp_string.at(0)==mes_struct.minu || temp_string.at(0)==mes_struct.plu)
             {mes_struct.mods.push_back(temp_string);}
             else
             {
-            modifier_present = false;
-            --i; //So argument parser can get the string instead
+                modifier_present = false;
+                --i; //So argument parser can get the string instead
             }
         }
     }
     //Parsing arguments
     for(; i < (mes_struct.space_pos.size()-1); i++)
     {
-        temp_string = mes_struct.message.substr(mes_struct.space_pos[i]+1,((mes_struct.space_pos[i+1]-mes_struct.space_pos[i])-1));
+        temp_string = mes_struct.message.substr(mes_struct.space_pos.at(i)+1,((mes_struct.space_pos.at(i+1)-mes_struct.space_pos.at(i))-1));
 
-        if(temp_string.size() != 0)
+        if(!temp_string.empty())
         {mes_struct.args.push_back(temp_string);}
     }
     mes_struct.space_pos.pop_back(); //Remove the space padding
 
     //std::cout << "command:" << mes_struct.command << rn;
+    //for(int i(0); i < mes_struct.args.size(); i++)
+    //{std::cout << "Argument"<< i << ":" << mes_struct.args.at(i) << rn;}
+    //for(int i(0); i < mes_struct.mods.size(); i++)
+    //{std::cout << "Modifier"<< i << ":" << mes_struct.mods.at(i) << rn;}
 }
 
 
@@ -342,16 +342,14 @@ void Bot::loop()
         for(int i(0); i < parsable_strings.size(); i++)
         {
             receive_string = parsable_strings.at(i);
-            if(receive_string.size() != 0)
+            if(!receive_string.empty())
             {
                 parserOfServerMessages();
-                if(s_mes_struct.channel.size() != 0)
-                {
-                    parserOfMessages();
-                    if(mes_struct.command.size() != 0)
-                    {checkCommands();}
+                parserOfMessages();
 
-                }
+                if(!mes_struct.command.empty())
+                {checkCommands();}
+
                 serverResponse();
                 postHandler();
                 resetVars();
