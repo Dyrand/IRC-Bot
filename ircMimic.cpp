@@ -45,9 +45,9 @@ void ircMimic::mimic()
     {
         if(mes_struct.args.size() == 0)
         {
-            if(std::find(nicks_mimic.begin(),nicks_mimic.end(),s_mes_struct.nickname) != nicks_mimic.end())
+            if(std::find(nicks_mimic.begin(),nicks_mimic.end(),s_mes_struct.nick) != nicks_mimic.end())
             {
-                nick_map.at(s_mes_struct.nickname) = m_fs;
+                nick_map.at(s_mes_struct.nick) = m_fs;
             }
         }
         else
@@ -57,11 +57,11 @@ void ircMimic::mimic()
     }
 
     if(mes_struct.args.size() == 0)
-    {mes_struct.args.push_back(s_mes_struct.nickname);}   //Saves not having to create a new condition
+    {mes_struct.args.push_back(s_mes_struct.nick);}   //Saves not having to create a new condition
 
     for(int i(0); i < mes_struct.args.size(); i++)
     {
-        if(mes_struct.args.at(i) == bot->getNickname()){}//dyramic won't mimic itself
+        if(mes_struct.args.at(i) == bot->getnick()){}//dyramic won't mimic itself
 
         else if(std::find(nicks_mimic.begin(),nicks_mimic.end(),mes_struct.args.at(i)) != nicks_mimic.end())
         {bot->privmsg(s_mes_struct.channel,"Already mimicing what "+mes_struct.args.at(i)+" says.");}
@@ -128,7 +128,7 @@ void ircMimic::demimic()
     else
     {
         if(mes_struct.args.size() == 0)
-        {mes_struct.args.push_back(s_mes_struct.nickname);}   //Saves not having to create a new condition
+        {mes_struct.args.push_back(s_mes_struct.nick);}   //Saves not having to create a new condition
 
         for(int i(0); i < mes_struct.args.size(); i++)
         {
@@ -150,9 +150,9 @@ void ircMimic::mimic_handler()
 
     if(s_mes_struct.message.at(0)!=mes_struct.ident)
     {
-        if(std::find(nicks_mimic.begin(), nicks_mimic.end(),s_mes_struct.nickname) != nicks_mimic.end())
+        if(std::find(nicks_mimic.begin(), nicks_mimic.end(),s_mes_struct.nick) != nicks_mimic.end())
         {
-            if(nick_map.at(s_mes_struct.nickname).pig_lat)
+            if(nick_map.at(s_mes_struct.nick).pig_lat)
             {s_mes_struct.message = pig_latin(s_mes_struct.message);}
 
             bot->privmsg(s_mes_struct.channel,s_mes_struct.message);
@@ -219,7 +219,7 @@ bool ircMimic::adjust_channel()
 {
     if(s_mes_struct.nick_flag)
     {
-        s_mes_struct.channel = s_mes_struct.nickname;
+        s_mes_struct.channel = s_mes_struct.nick;
         return true;
     }
     return false;

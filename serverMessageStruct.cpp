@@ -5,11 +5,11 @@ serverMessageStruct& serverMessageStruct::operator=(serverMessageStruct temp)
     space_pos = temp.space_pos;
     args      = temp.args;
     prefix    = temp.prefix;
-    username  = temp.username;
+    user  = temp.user;
     command   = temp.command;
     channel   = temp.channel;
     message   = temp.message;
-    nickname  = temp.nickname;
+    nick  = temp.nick;
     prefix_end_pos = temp.prefix_end_pos;
     mes_start_pos  = temp.mes_start_pos;
     nick_flag = temp.nick_flag;
@@ -22,11 +22,11 @@ void serverMessageStruct::reset()
     space_pos.clear();
     args.clear();
     prefix.clear();
-    username.clear();
+    user.clear();
     command.clear();
     channel.clear();
     message.clear();
-    nickname.clear();
+    nick.clear();
 
     prefix_end_pos = std::string::npos;
     mes_start_pos  = std::string::npos;

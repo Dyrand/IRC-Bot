@@ -11,34 +11,49 @@
 
 Bot::Bot():
     mimic_o(this),
-    stay_connected(true),
-    connection_password("password"),
-    nickname("Dyramic"),
-    username("dyramic"),
-    realname("dyramic"),
+    stay_conned(true),
+    conn_pwd("password"),
+    nick("Dyramica"),
+    user("dyramic"),
+    real("dyramic"),
     mode("0"),
-    target_channel("#botdever"),
+    channel("#botdever"),
     server("irc.freenode.com"),
     port(8001)
 {}
 
-int Bot::connectToServer(std::string server, int port)
-{return statusSwitch(status = socket.connect(server,port));}
+int Bot::connectToServer(std::string server_t, int port_t)
+{
+    server = server_t;
+    port   = port_t;
+    return connectToServer();
+}
 
 int Bot::connectToServer()
 {return statusSwitch(status = socket.connect(server,port));}
 
-
-int Bot::connectionRegistration()
+void Bot::connectionRegistration(std::string conn_pwd_t, std::string nick_t, std::string user_t)
 {
-    using namespace irc;
-    send(PASS+s+connection_password);
-    send(NICK+s+nickname);
-    send(USER+s+username+s+mode+s+unused+s+c+realname);
-    return status;
+    conn_pwd = conn_pwd_t;
+    nick = nick_t;
+    user = user_t;
+    return connectionRegistration();
 }
 
-int Bot::statusSwitch(int status)
+void Bot::connectionRegistration()
+{
+    send("PASS "+conn_pwd);
+    send("NICK "+nick);
+    send("USER "+user+" "+mode+" * :"+real);
+}
+
+int Bot::statusSwitch(sf::Socket::Status status_t)
+{
+    status = status_t;
+    return statusSwitch();
+}
+
+int Bot::statusSwitch()
 {
     switch(status)
     {
@@ -63,74 +78,67 @@ int Bot::statusSwitch(int status)
 }
 
 
-void Bot::send(std::string formated_text)
+void Bot::send(std::string send_mes)
 {
-    using namespace irc;
-    formated_text.append(rn);
-    std::cout << formated_text;
-    status = socket.send(formated_text.c_str(),formated_text.size());
+    send_mes.append("\r\n");
+    std::cout << send_mes;
+    status = socket.send(send_mes.c_str(),send_mes.size());
 }
 
 //Using A TCPsocket, divide a message based on "\r\n" position, messages with out a "\r\n" at the end is regarded as
 //a partial string and saved for combining
 void Bot::receive()
 {
-    using namespace irc;
-
-    status = socket.receive(receive_text.data(),receive_text.size(),bytes_received);
-    receive_string.assign(receive_text.begin(),receive_text.begin()+bytes_received);
+    status = socket.receive(rec_text.data(),rec_text.size(),bytes_rec);
+    rec_string.assign(rec_text.begin(),rec_text.begin()+bytes_rec);
 
     //Appends two partial strings together if necessary
-    rn_pos = receive_string.find(rn);
-    if(partial_flag && (rn_pos != receive_string.npos))
+    rn_pos = rec_string.find("\r\n");
+    if(part_flag && (rn_pos != rec_string.npos))
     {
-        parsable_strings.emplace_back(partial_string+(receive_string.substr(0,rn_pos+2)));
-        receive_string.erase(0,rn_pos+2);
+        parsable_strings.emplace_back(partial_string+(rec_string.substr(0,rn_pos+2)));
+        rec_string.erase(0,rn_pos+2);
         partial_string.clear();
-        partial_flag = false;
+        part_flag = false;
     }
 
     //Split strings on "\r\n" positions and removes characters until there is no "\r\n" left
-    while((rn_pos = receive_string.find(rn)) != receive_string.npos)
+    while((rn_pos = rec_string.find("\r\n")) != rec_string.npos)
     {
-        parsable_strings.emplace_back(receive_string.substr(0,rn_pos+2));
-        receive_string.erase(0,rn_pos+2);
+        parsable_strings.emplace_back(rec_string.substr(0,rn_pos+2));
+        rec_string.erase(0,rn_pos+2);
     }
 
     //If there is no "\r\n" left, but there are charcters still left in the string, it is a partial string
     //that must be combined
-    if(receive_string.size() != 0)
+    if(rec_string.size() != 0)
     {
-        partial_string.assign(receive_string);
-        receive_string.clear();
-        partial_flag = true;
+        partial_string.assign(rec_string);
+        rec_string.clear();
+        part_flag = true;
     }
 
-    receive_text.fill('\0');
-}
-
-
-void Bot::join(std::string target_channel)
-{
-    using namespace irc;
-    send(JOIN+" "+target_channel);
-}
-
-void Bot::join()
-{
-    using namespace irc;
-    send(JOIN+" "+target_channel);
+    rec_text.fill('\0');
 }
 
 void Bot::privmsg(std::string channel, std::string message)
+{send("PRIVMSG "+channel+" :"+message);}
+
+void Bot::join(std::string channel_t)
 {
-    using namespace irc;
-    send(PRIVMSG+" "+channel+" "+" :"+message);
+    channel = channel_t;
+    join();
 }
 
+void Bot::join()
+{send("JOIN "+channel);}
+
+void Bot::quit(std::string mes)
+{send("QUIT "+mes);}
 
 
-void Bot::parserOfServerMessages()
+
+void Bot::parseServerMes()
 {
 //<-----------prefix-----------> <command> <channel> :<message>
 //<nick|servername>!<username>@ <command> <channel> :<message>
@@ -147,70 +155,70 @@ void Bot::parserOfServerMessages()
 //ERROR :Closing Link: 127.0.0.1 (Connection timed out)
 //HYPOTHETICALMESSAGE  /*no space and no : or !
 
-    using namespace irc;
 
-    std::cout << receive_string;
 
-    if((rn_pos = receive_string.find("\r\n")) == std::string::npos)
+    std::cout << rec_string;
+
+    if((rn_pos = rec_string.find("\r\n")) == std::string::npos)
     {std::cout << "Receive string does not contain \"\\r\\n\".";}
 
     //Gets the prefix if there is one
-    if(receive_string.front() == ':')
+    if(rec_string.front() == ':')
     {
-        if((s_mes_struct.prefix_end_pos = receive_string.find(' ')) != std::string::npos)
-        {s_mes_struct.prefix = receive_string.substr(1,s_mes_struct.prefix_end_pos);}
+        if((s_mes_struct.prefix_end_pos = rec_string.find(' ')) != std::string::npos)
+        {s_mes_struct.prefix = rec_string.substr(1,s_mes_struct.prefix_end_pos);}
         else{std::cout << "Receive string does not contain a space.\n";}
     }else{std::cout << "Receive string does not start with a ':'.\n";}
 
 
     //Gets the message if there is one
-    if((s_mes_struct.mes_start_pos = receive_string.find(" :")) != std::string::npos)
-    {s_mes_struct.message = receive_string.substr(s_mes_struct.mes_start_pos+2,(rn_pos-s_mes_struct.mes_start_pos)-2);}
+    if((s_mes_struct.mes_start_pos = rec_string.find(" :")) != std::string::npos)
+    {s_mes_struct.message = rec_string.substr(s_mes_struct.mes_start_pos+2,(rn_pos-s_mes_struct.mes_start_pos)-2);}
     else
     {
         std::cout << "Receive string does not contain a message.\n";
         //padding for correctly getting the last block of text
-        receive_string.insert(rn_pos,s);
+        rec_string.insert(rn_pos," ");
         s_mes_struct.mes_start_pos = rn_pos;
     }
 
 
     //Find all the spaces between prefix_end_pos and mes_start_pos
     space_pos = s_mes_struct.prefix_end_pos;
-    while((space_pos = receive_string.find(' ',++space_pos)) < s_mes_struct.mes_start_pos)
+    while((space_pos = rec_string.find(' ',++space_pos)) < s_mes_struct.mes_start_pos)
     {s_mes_struct.space_pos.emplace_back(space_pos);}
 
     s_mes_struct.space_pos.emplace_back(s_mes_struct.mes_start_pos);
 
     //Gets the command in the message, at least there should be one
-    s_mes_struct.command = receive_string.substr(s_mes_struct.prefix_end_pos+1,(s_mes_struct.space_pos.at(0)-s_mes_struct.prefix_end_pos)-1);
+    s_mes_struct.command = rec_string.substr(s_mes_struct.prefix_end_pos+1,(s_mes_struct.space_pos.at(0)-s_mes_struct.prefix_end_pos)-1);
 
 
     //Implies the 2nd thing after the message is a channel or nickname, both go to nickname var though
     if(s_mes_struct.space_pos.size() >= 2)
-    {s_mes_struct.channel = receive_string.substr(s_mes_struct.space_pos.at(0)+1,s_mes_struct.space_pos.at(1)-s_mes_struct.space_pos.at(0));}
+    {s_mes_struct.channel = rec_string.substr(s_mes_struct.space_pos.at(0)+1,s_mes_struct.space_pos.at(1)-s_mes_struct.space_pos.at(0));}
 
     //Parse the prefix into nickname and username if possible
     if((excl_pos = s_mes_struct.prefix.find('!')) != std::string::npos)
-    {s_mes_struct.nickname = s_mes_struct.prefix.substr(0,excl_pos);}
+    {s_mes_struct.nick = s_mes_struct.prefix.substr(0,excl_pos);}
     if((at_pos = s_mes_struct.prefix.find('@')) != std::string::npos)
     {
         if(s_mes_struct.prefix.at(excl_pos+1) == '~')
-        {s_mes_struct.username = s_mes_struct.prefix.substr(excl_pos+2,(at_pos-excl_pos)-2);}
+        {s_mes_struct.user = s_mes_struct.prefix.substr(excl_pos+2,(at_pos-excl_pos)-2);}
         else
-        {s_mes_struct.username = s_mes_struct.prefix.substr(excl_pos+1,(at_pos-excl_pos)-1);}
+        {s_mes_struct.user = s_mes_struct.prefix.substr(excl_pos+1,(at_pos-excl_pos)-1);}
     }
 
     //The rest of the stuff left between spaces is put into a string vector
     for(int i(1); i < (s_mes_struct.space_pos.size()-1); i++)
-    {s_mes_struct.args.emplace_back(receive_string.substr(s_mes_struct.space_pos.at(i)+1,s_mes_struct.space_pos.at(i+1)-s_mes_struct.space_pos.at(i)));}
+    {s_mes_struct.args.emplace_back(rec_string.substr(s_mes_struct.space_pos.at(i)+1,s_mes_struct.space_pos.at(i+1)-s_mes_struct.space_pos.at(i)));}
 
     //std::cout << "prefix  :" << s_mes_struct.prefix   << rn;
     //std::cout << "command :" << s_mes_struct.command  << rn;
     //std::cout << "channel :" << s_mes_struct.channel  << rn;
     //std::cout << "message :" << s_mes_struct.message  << rn;
-    //std::cout << "nickname:" << s_mes_struct.nickname << rn;
-    //std::cout << "username:" << s_mes_struct.username << rn;
+    //std::cout << "nick:" << s_mes_struct.nick << rn;
+    //std::cout << "user:" << s_mes_struct.user << rn;
 
     //for(int i(0); i < s_mes_struct.args.size(); i++)
     //{std::cout << "Argument"<< i << ":" << s_mes_struct.args.at(i) << rn;}
@@ -224,7 +232,7 @@ void Bot::postHandler()
 }
 
 
-void Bot::parserOfMessages()
+void Bot::parseMes()
 {
     //Check if message is empty
     if(s_mes_struct.message.empty())
@@ -291,7 +299,7 @@ void Bot::checkCommands()
     else if(mes_struct.command == "demimic")
     {mimic_o.demimic();}
     else if(mes_struct.command == "discon")
-    {disconnect();}
+    {discon();}
     else if(mes_struct.command == ">")
     {rawInput();}
     //else
@@ -300,9 +308,9 @@ void Bot::checkCommands()
 
 void Bot::serverResponse()
 {
-    using namespace irc;
-    if(s_mes_struct.command==PING)
-    {send(PONG+s+s_mes_struct.message+rn);}
+
+    if(s_mes_struct.command=="PING")
+    {send("PONG "+s_mes_struct.message+"\r\n");}
 }
 
 
@@ -316,17 +324,17 @@ void Bot::resetVars()
 
 void Bot::loop()
 {
-    using namespace irc;
+
     do
     {
         receive();
         for(int i(0); i < parsable_strings.size(); i++)
         {
-            receive_string = parsable_strings.at(i);
-            if(!receive_string.empty())
+            rec_string = parsable_strings.at(i);
+            if(!rec_string.empty())
             {
-                parserOfServerMessages();
-                parserOfMessages();
+                parseServerMes();
+                parseMes();
 
                 if(!mes_struct.command.empty())
                 {checkCommands();}
@@ -336,30 +344,30 @@ void Bot::loop()
                 resetVars();
             }
         }parsable_strings.clear();
-    }while(stay_connected==true);
-    send(QUIT+" :Ever want to look more like?"+rn);
+    }while(stay_conned==true);
+    quit("Ever want to look more like?");
     socket.disconnect();
 }
 
-void Bot::disconnect()
+void Bot::discon()
 {
-    if(s_mes_struct.nickname == Dyrand)
-    {stay_connected = false;}
+    if(s_mes_struct.nick == Dyrand)
+    {stay_conned = false;}
 }
 
 void Bot::rawInput()
 {
-    using namespace irc;
-    if((s_mes_struct.nickname == Dyrand) && (mes_struct.message.size() > 2))
+
+    if((s_mes_struct.nick == Dyrand) && (mes_struct.message.size() > 2))
     {
     mes_struct.postfix = mes_struct.message.substr(3,mes_struct.last_char_pos-1);
-    send(mes_struct.postfix+rn);
+    send(mes_struct.postfix+"\r\n");
     }
     else
-    {privmsg(s_mes_struct.channel,"\1ACTION tells "+s_mes_struct.nickname+" that the \">>\" command is only for: "+Dyrand+".\1");}
+    {privmsg(s_mes_struct.channel,"\1ACTION tells "+s_mes_struct.nick+" that the \">>\" command is only for: "+Dyrand+".\1");}
 }
 
-std::string Bot::getNickname()
-{return nickname;}
+std::string Bot::getnick()
+{return nick;}
 
 

@@ -8,10 +8,8 @@ int main()
 
     if(bot.connectToServer()==sf::Socket::Done)
     {
-        if(bot.connectionRegistration()==sf::Socket::Done)
-        {
-            bot.join();
-            bot.loop();
-        }
+        bot.connectionRegistration();
+        bot.join();
+        bot.loop();
     }
 }

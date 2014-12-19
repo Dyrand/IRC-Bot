@@ -13,11 +13,11 @@ struct serverMessageStruct
     std::vector<std::string> args;
 
     std::string prefix   = "";
-    std::string username = "";
+    std::string user = "";
     std::string command  = "";
     std::string channel  = "";
     std::string message  = "";
-    std::string nickname = "";
+    std::string nick = "";
 
     int prefix_end_pos = std::string::npos;
     int mes_start_pos  = std::string::npos;

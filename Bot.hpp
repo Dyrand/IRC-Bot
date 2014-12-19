@@ -5,7 +5,6 @@
 
 #include "serverMessageStruct.hpp"
 #include "ircMimic.hpp"
-#include "ircConsts.hpp"
 
 
 // TODO (dyrand#4#12/15/2014): fun command, detects if there is fun
@@ -13,37 +12,39 @@
 class Bot
 {
     public:
-        //using namespace irc;
 
         Bot();
 
         //Establishing Connections
-        int connectToServer(std::string server, int port);
+        int connectToServer(std::string server_t, int port_t);
         int connectToServer();
-        int connectionRegistration();
+        void connectionRegistration(std::string conn_pwd_t, std::string nick_t, std::string username_t );
+        void connectionRegistration();
 
-        //Outputs text depending on what staus is
-        int statusSwitch(int status);
+        //Outputs text depending on what status is
+        int statusSwitch(sf::Socket::Status status_t);
+        int statusSwitch();
 
         //Send and Receive
         void send(std::string formated_text);
         void receive();
 
         //Basic IRC commands
-        void privmsg(std::string channel, std::string message);
+        void privmsg(std::string channel, std::string mes);
         void join(std::string target_channel);
         void join();
+        void quit(std::string mes);
 
-        void parserOfServerMessages();
+        void parseServerMes();
         void postHandler();
-        void parserOfMessages();
+        void parseMes();
         void checkCommands();
         void serverResponse();
         void resetVars();
         void loop();
 
         /*Simple Commands*/ //most likely can remain in ircBotClass
-        void disconnect();
+        void discon();
         void rawInput();
 
         /*Objects for commands*/
@@ -54,22 +55,22 @@ class Bot
         messageStruct         mes_struct; //message_struct
 
         /*Get functions*/
-        std::string getNickname();
+        std::string getnick();
 
     private:
 
-        bool stay_connected;
+        bool stay_conned;
 
 
-        long unsigned int bytes_received;
-        std::array<char,512> receive_text;
+        long unsigned int bytes_rec;
+        std::array<char,512> rec_text;
         std::vector<std::string> parsable_strings;
-        std::string receive_string;
+        std::string rec_string;
 
         std::string partial_string;
         std::string temp_string;
 
-        bool partial_flag = false;
+        bool part_flag = false;
 
         int rn_pos    = std::string::npos; // "\r\n"
         int space_pos = std::string::npos; // " "
@@ -81,15 +82,15 @@ class Bot
         sf::TcpSocket      socket;
 
 
-        std::string connection_password;
-        std::string nickname;
-        std::string username;
-        std::string realname;
+        std::string conn_pwd;
+        std::string nick;
+        std::string user;
+        std::string real;
         std::string mode;
 
 
-        std::string formated_text;
-        std::string target_channel;
+        std::string send_mes;
+        std::string channel;
         std::string server;
         int port;
 
