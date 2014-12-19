@@ -13,7 +13,7 @@ Bot::Bot():
     mimic_o(this),
     stay_conned(true),
     conn_pwd("password"),
-    nick("Dyramica"),
+    nick("Dyramic"),
     user("dyramic"),
     real("dyramic"),
     mode("0"),
@@ -216,18 +216,18 @@ void Bot::parseServerMsg()
     }
 
     //The rest of the stuff left between spaces is put into a string vector
-    for(int i(1); i < (s_msg_struct.space_pos.size()-1); i++)
+    for(unsigned int i(1); i < (s_msg_struct.space_pos.size()-1); i++)
     {s_msg_struct.args.emplace_back(rec_string.substr(s_msg_struct.space_pos.at(i)+1,s_msg_struct.space_pos.at(i+1)-s_msg_struct.space_pos.at(i)));}
 
-    std::cout << "prefix  :" << s_msg_struct.prefix   << "\n";
-    std::cout << "command :" << s_msg_struct.command  << "\n";
-    std::cout << "channel :" << s_msg_struct.channel  << "\n";
-    std::cout << "message :" << s_msg_struct.msg  << "\n";
-    std::cout << "nick:" << s_msg_struct.nick << "\n";
-    std::cout << "user:" << s_msg_struct.user << "\n";
+    //std::cout << "prefix  :" << s_msg_struct.prefix   << "\n";
+    //std::cout << "command :" << s_msg_struct.command  << "\n";
+    //std::cout << "channel :" << s_msg_struct.channel  << "\n";
+    //std::cout << "message :" << s_msg_struct.msg  << "\n";
+    //std::cout << "nick:" << s_msg_struct.nick << "\n";
+    //std::cout << "user:" << s_msg_struct.user << "\n";
 
-    for(int i(0); i < s_msg_struct.args.size(); i++)
-    {std::cout << "Argument"<< i << ":" << s_msg_struct.args.at(i) << "\n";}
+    //for(unsigned int i(0); i < s_msg_struct.args.size(); i++)
+    //{std::cout << "Argument"<< i << ":" << s_msg_struct.args.at(i) << "\n";}
 }
 
 
@@ -263,7 +263,7 @@ void Bot::parseMsg()
     msg_struct.command = msg_struct.msg.substr(1,(msg_struct.space_pos.at(0)-1));
 
     bool modifier_present = true;
-    int i(0);
+    unsigned int i(0);
     //Parsing modifiers
     for(; (i < (msg_struct.space_pos.size()-1)) && modifier_present; i++)
     {
@@ -291,7 +291,7 @@ void Bot::parseMsg()
     msg_struct.space_pos.pop_back(); //Remove the space padding
 
     //Gets the postfix if there is one
-    if(string_length = msg_struct.command.size() != msg_struct.last_char_pos)
+    if((string_length = msg_struct.command.size()) != msg_struct.last_char_pos)
     {msg_struct.postfix = msg_struct.msg.substr(string_length+2,(msg_struct.last_char_pos-string_length)-1);}
 
     //std::cout << "command:" << msg_struct.command << "\n";
@@ -335,7 +335,7 @@ void Bot::loop()
     do
     {
         receive();
-        for(int i(0); i < parsable_strings.size(); i++)
+        for(unsigned int i(0); i < parsable_strings.size(); i++)
         {
             rec_string = parsable_strings.at(i);
             if(!rec_string.empty())

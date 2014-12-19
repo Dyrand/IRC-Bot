@@ -68,14 +68,14 @@ class Bot
 
         std::string part_string;
         std::string temp_string;
-        int string_length;
+        unsigned int string_length;
 
         bool part_flag = false;
 
-        int rn_pos    = std::string::npos; // "\r\n"
-        int space_pos = std::string::npos; // " "
-        int excl_pos  = std::string::npos; // "!"
-        int at_pos    = std::string::npos; // "@"
+        size_t rn_pos    = std::string::npos; // "\r\n"
+        size_t space_pos = std::string::npos; // " "
+        size_t excl_pos  = std::string::npos; // "!"
+        size_t at_pos    = std::string::npos; // "@"
 
         sf::Socket::Status status;
         sf::TcpSocket      socket;
