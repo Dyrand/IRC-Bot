@@ -51,8 +51,8 @@ class ircMimic
         }m_fs;
 
         //Flags demimic
-        bool demimic_all;
-        bool demim_desc;
+        bool demimic_all = false;
+        bool demim_desc = false;
 
         std::vector<std::string> nicks_mimic; //nicknames that are being mimiced
         std::map<std::string,flags_m> nick_map;

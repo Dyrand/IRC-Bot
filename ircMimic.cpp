@@ -5,8 +5,6 @@
 
 ircMimic::ircMimic(Bot* tempBot):
 
-    demimic_all(false),
-
     bot(tempBot)
 {}
 
@@ -17,7 +15,7 @@ void ircMimic::mimic()
     adjust_channel();
 
     //Goes through modifier vector and sets true any modifiers that are found
-    for(int i(0); i < msg_struct.mods.size(); i++)
+    for(unsigned int i(0); i < msg_struct.mods.size(); i++)
     {
         if(msg_struct.mods[i] == "-p")
         {m_fs.pig_lat = true;}
@@ -59,7 +57,7 @@ void ircMimic::mimic()
     if(msg_struct.args.size() == 0)
     {msg_struct.args.push_back(s_msg_struct.nick);}   //Saves not having to create a new condition
 
-    for(int i(0); i < msg_struct.args.size(); i++)
+    for(unsigned int i(0); i < msg_struct.args.size(); i++)
     {
         if(msg_struct.args.at(i) == bot->getnick()){}//dyramic won't mimic itself
 
@@ -108,7 +106,7 @@ void ircMimic::demimic()
     adjust_channel();
 
     bool demimic_all = false;
-    for(int i(0); i < msg_struct.mods.size(); i++)
+    for(unsigned int i(0); i < msg_struct.mods.size(); i++)
     {
         if(msg_struct.mods[i] == "-a")
         {demimic_all=true;}
@@ -119,7 +117,7 @@ void ircMimic::demimic()
         {bot->privmsg(s_msg_struct.channel,"No one to demimic.");}
         else
         {m_fs.pig_lat = false;
-            for(int i(0); i < nicks_mimic.size(); i++)
+            for(unsigned int i(0); i < nicks_mimic.size(); i++)
             {bot->privmsg(s_msg_struct.channel,"Not mimicing what "+nicks_mimic[i]+" says.");}
             nick_map.clear();
             nicks_mimic.clear();
@@ -130,7 +128,7 @@ void ircMimic::demimic()
         if(msg_struct.args.size() == 0)
         {msg_struct.args.push_back(s_msg_struct.nick);}   //Saves not having to create a new condition
 
-        for(int i(0); i < msg_struct.args.size(); i++)
+        for(unsigned int i(0); i < msg_struct.args.size(); i++)
         {
             auto iter = nicks_mimic.end();
             if((iter = std::find(nicks_mimic.begin(), nicks_mimic.end(),msg_struct.args[i])) != nicks_mimic.end())
@@ -171,7 +169,7 @@ std::string ircMimic::pig_latin(std::string text)
     bool npos_reached = false;
 
     //Find spaces within text
-    for(int i(0); npos_reached == false; i++)
+    for(unsigned int i(0); npos_reached == false; i++)
     {
         i = text.find(" ",i);
         if(i != text.npos)
@@ -183,7 +181,7 @@ std::string ircMimic::pig_latin(std::string text)
     //Divide text based on spaces
     space_pos.emplace(space_pos.begin(),-1); //Padding for beginning
     space_pos.emplace_back(text.size());     //Padding for end
-    for(int i(0);(i < (space_pos.size()-1)); i++)
+    for(unsigned int i(0);(i < (space_pos.size()-1)); i++)
     {
         temp_string = text.substr(space_pos[i]+1,((space_pos[i+1]-space_pos[i])-1));
         if(temp_string.size() != 0)
@@ -191,7 +189,7 @@ std::string ircMimic::pig_latin(std::string text)
     }
 
     //Applies pig latin to divide string if it is only alpha numeric
-    for(int i(0); i < string_vect.size(); i++)
+    for(unsigned int i(0); i < string_vect.size(); i++)
     {
         if(string_vect.at(i).find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ") == string_vect.at(i).npos)
         {
@@ -206,7 +204,7 @@ std::string ircMimic::pig_latin(std::string text)
 
     //Combines the divided strings back into one
     temp_string.assign("");
-    for(int i(0); i < string_vect.size(); i++)
+    for(unsigned int i(0); i < string_vect.size(); i++)
     {
         temp_string.append(string_vect.at(i));
         temp_string.append(" ");
