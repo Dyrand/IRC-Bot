@@ -68,6 +68,7 @@ class Bot
 
         std::string part_string;
         std::string temp_string;
+        int string_length;
 
         bool part_flag = false;
 

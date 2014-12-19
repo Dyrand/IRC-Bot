@@ -202,7 +202,7 @@ void Bot::parseServerMsg()
 
     //Implies the 2nd piece after the message is a channel or nickname, both go to channel var though
     if(s_msg_struct.space_pos.size() >= 2)
-    {s_msg_struct.channel = rec_string.substr(s_msg_struct.space_pos.at(0)+1,s_msg_struct.space_pos.at(1)-s_msg_struct.space_pos.at(0));}
+    {s_msg_struct.channel = rec_string.substr(s_msg_struct.space_pos.at(0)+1,(s_msg_struct.space_pos.at(1)-s_msg_struct.space_pos.at(0))-1);}
 
     //Parse the prefix into nickname and username if possible
     if((excl_pos = s_msg_struct.prefix.find('!')) != std::string::npos)
@@ -291,8 +291,8 @@ void Bot::parseMsg()
     msg_struct.space_pos.pop_back(); //Remove the space padding
 
     //Gets the postfix if there is one
-    if(msg_struct.command.size() != msg_struct.last_char_pos)
-    {msg_struct.msg.substr(msg_struct.command.size()+2,(msg_struct.last_char_pos-msg_struct.command.size())-1);}
+    if(string_length = msg_struct.command.size() != msg_struct.last_char_pos)
+    {msg_struct.postfix = msg_struct.msg.substr(string_length+2,(msg_struct.last_char_pos-string_length)-1);}
 
     //std::cout << "command:" << msg_struct.command << "\n";
     //std::cout << "postfix:" << msg_struct.postfix << "\n";
