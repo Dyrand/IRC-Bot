@@ -4,41 +4,41 @@
 #include <vector>
 #include <string>
 
-struct serverMessageStruct
+struct serverMsgStruct
 {
-    serverMessageStruct& operator=(serverMessageStruct);
+    serverMsgStruct& operator=(serverMsgStruct);
     void reset();
 
-    std::vector<int> space_pos;
     std::vector<std::string> args;
+    std::vector<int> space_pos;
 
-    std::string prefix   = "";
-    std::string user = "";
-    std::string command  = "";
-    std::string channel  = "";
-    std::string message  = "";
-    std::string nick = "";
+    std::string prefix;
+    std::string user;
+    std::string nick;
+    std::string command;
+    std::string channel;
+    std::string msg;
 
-    int prefix_end_pos = std::string::npos;
-    int mes_start_pos  = std::string::npos;
+    size_t prefix_end_pos = std::string::npos;
+    size_t msg_start_pos  = std::string::npos;
 
     bool nick_flag = false; //used to note that channel name actually contains a nickname, e.g. /msg
 };
 
-struct messageStruct
+struct msgStruct
 {
-    messageStruct& operator=(messageStruct);
+    msgStruct& operator=(msgStruct);
     void reset();
 
-    std::vector<int> space_pos;
-    std::vector<std::string> args;
+    std::vector<std::string> args; //arguments
     std::vector<std::string> mods; //modifiers
+    std::vector<int> space_pos;
 
-    std::string message = "";
-    std::string command = "";
-    std::string postfix = "";
+    std::string msg;
+    std::string command;
+    std::string postfix;
 
-    int last_char_pos=0;
+    size_t last_char_pos = std::string::npos;
 
     char ident = '>';
     const char minu  = '-';

@@ -1,60 +1,56 @@
 #include "serverMessageStruct.hpp"
 
-serverMessageStruct& serverMessageStruct::operator=(serverMessageStruct temp)
+serverMsgStruct& serverMsgStruct::operator=(serverMsgStruct temp)
 {
-    space_pos = temp.space_pos;
     args      = temp.args;
+    space_pos = temp.space_pos;
     prefix    = temp.prefix;
-    user  = temp.user;
+    user      = temp.user;
+    nick      = temp.nick;
     command   = temp.command;
     channel   = temp.channel;
-    message   = temp.message;
-    nick  = temp.nick;
+    msg       = temp.msg;
     prefix_end_pos = temp.prefix_end_pos;
-    mes_start_pos  = temp.mes_start_pos;
+    msg_start_pos  = temp.msg_start_pos;
     nick_flag = temp.nick_flag;
 
     return *this;
 }
 
-void serverMessageStruct::reset()
+void serverMsgStruct::reset()
 {
-    space_pos.clear();
     args.clear();
+    space_pos.clear();
     prefix.clear();
     user.clear();
+    nick.clear();
     command.clear();
     channel.clear();
-    message.clear();
-    nick.clear();
-
+    msg.clear();
     prefix_end_pos = std::string::npos;
-    mes_start_pos  = std::string::npos;
-
+    msg_start_pos  = std::string::npos;
     nick_flag = false;
 }
 
-messageStruct& messageStruct::operator=(messageStruct temp)
+msgStruct& msgStruct::operator=(msgStruct temp)
 {
-    space_pos = temp.space_pos;
     args      = temp.args;
     mods      = temp.mods;
-    message   = temp.message;
+    space_pos = temp.space_pos;
+    msg       = temp.msg;
     command   = temp.command;
     postfix   = temp.postfix;
-
     last_char_pos = temp.last_char_pos;
     return *this;
 }
 
-void messageStruct::reset()
+void msgStruct::reset()
 {
-    space_pos.clear();
     args.clear();
     mods.clear();
-    message.clear();
+    space_pos.clear();
+    msg.clear();
     command.clear();
     postfix.clear();
-
-    last_char_pos=0;
+    last_char_pos = std::string::npos;
 }

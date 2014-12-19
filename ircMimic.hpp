@@ -23,7 +23,7 @@ class ircMimic
         void demimic_description();
 
         bool mim_check_conf_mods(); //checks if any mimic modifies conflict
-        void mim_mods_reset();      //resets modifiers to false
+        void mim_mods_reset();      //resets mimic modifiers to false
         //bool demim_check_conf_mods(); //checks if any demimic modifies conflict
 
         bool adjust_channel(); //replace channel with nickname if the channel var contains a nickname
@@ -34,8 +34,8 @@ class ircMimic
 
         Bot* bot;
 
-        serverMessageStruct s_mes_struct;
-        messageStruct         mes_struct;
+        serverMsgStruct s_msg_struct;
+        msgStruct         msg_struct;
 
         //Flags mimic
         struct flags_m

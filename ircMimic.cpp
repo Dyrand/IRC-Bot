@@ -12,18 +12,18 @@ ircMimic::ircMimic(Bot* tempBot):
 
 void ircMimic::mimic()
 {
-    s_mes_struct = bot->s_mes_struct;
-    mes_struct = bot->mes_struct;
+    s_msg_struct = bot->s_msg_struct;
+    msg_struct = bot->msg_struct;
     adjust_channel();
 
     //Goes through modifier vector and sets true any modifiers that are found
-    for(int i(0); i < mes_struct.mods.size(); i++)
+    for(int i(0); i < msg_struct.mods.size(); i++)
     {
-        if(mes_struct.mods[i] == "-p")
+        if(msg_struct.mods[i] == "-p")
         {m_fs.pig_lat = true;}
-        else if(mes_struct.mods[i] == "-desc")
+        else if(msg_struct.mods[i] == "-desc")
         {m_fs.desc = true;}
-        else if(mes_struct.mods[i] == "-e")
+        else if(msg_struct.mods[i] == "-e")
         {m_fs.edit = true;}
     }
 
@@ -43,33 +43,33 @@ void ircMimic::mimic()
 
     if(m_fs.edit)
     {
-        if(mes_struct.args.size() == 0)
+        if(!msg_struct.args.empty())
         {
-            if(std::find(nicks_mimic.begin(),nicks_mimic.end(),s_mes_struct.nick) != nicks_mimic.end())
+            if(std::find(nicks_mimic.begin(),nicks_mimic.end(),s_msg_struct.nick) != nicks_mimic.end())
             {
-                nick_map.at(s_mes_struct.nick) = m_fs;
+                nick_map.at(s_msg_struct.nick) = m_fs;
             }
         }
         else
-        {bot->privmsg(s_mes_struct.channel,"-e can only be used with modifiers, not arguments.");}
+        {bot->privmsg(s_msg_struct.channel,"-e can only be used with modifiers, not arguments.");}
         mim_mods_reset();
         return;
     }
 
-    if(mes_struct.args.size() == 0)
-    {mes_struct.args.push_back(s_mes_struct.nick);}   //Saves not having to create a new condition
+    if(msg_struct.args.size() == 0)
+    {msg_struct.args.push_back(s_msg_struct.nick);}   //Saves not having to create a new condition
 
-    for(int i(0); i < mes_struct.args.size(); i++)
+    for(int i(0); i < msg_struct.args.size(); i++)
     {
-        if(mes_struct.args.at(i) == bot->getnick()){}//dyramic won't mimic itself
+        if(msg_struct.args.at(i) == bot->getnick()){}//dyramic won't mimic itself
 
-        else if(std::find(nicks_mimic.begin(),nicks_mimic.end(),mes_struct.args.at(i)) != nicks_mimic.end())
-        {bot->privmsg(s_mes_struct.channel,"Already mimicing what "+mes_struct.args.at(i)+" says.");}
+        else if(std::find(nicks_mimic.begin(),nicks_mimic.end(),msg_struct.args.at(i)) != nicks_mimic.end())
+        {bot->privmsg(s_msg_struct.channel,"Already mimicing what "+msg_struct.args.at(i)+" says.");}
         else
         {
-            nicks_mimic.push_back(mes_struct.args.at(i));
-            nick_map.emplace(mes_struct.args.at(i),m_fs);
-            bot->privmsg(s_mes_struct.channel,"Now mimicing what "+mes_struct.args.at(i)+" says.");
+            nicks_mimic.push_back(msg_struct.args.at(i));
+            nick_map.emplace(msg_struct.args.at(i),m_fs);
+            bot->privmsg(s_msg_struct.channel,"Now mimicing what "+msg_struct.args.at(i)+" says.");
         }
     }
     mim_mods_reset();
@@ -77,17 +77,17 @@ void ircMimic::mimic()
 
 void ircMimic::mimic_description()
 {
-    bot->privmsg(s_mes_struct.channel,"repeats everything a specific nickname says.");
+    bot->privmsg(s_msg_struct.channel,"repeats everything a specific nickname says.");
     m_fs.desc = false;
 }
 void ircMimic::demimic_description()
-{bot->privmsg(s_mes_struct.channel,"stops mimic.");}
+{bot->privmsg(s_msg_struct.channel,"stops mimic.");}
 
 bool ircMimic::mim_check_conf_mods()
 {
 
-    if(m_fs.desc == true && (mes_struct.mods.size() > 1))
-    {bot->privmsg(s_mes_struct.channel,"-desc can only be used by itself.");}
+    if(m_fs.desc == true && (msg_struct.mods.size() > 1))
+    {bot->privmsg(s_msg_struct.channel,"-desc can only be used by itself.");}
     else
     {return false;}
 
@@ -103,40 +103,40 @@ void ircMimic::mim_mods_reset()
 
 void ircMimic::demimic()
 {
-    s_mes_struct = bot->s_mes_struct;
-    mes_struct   = bot->mes_struct;
+    s_msg_struct = bot->s_msg_struct;
+    msg_struct   = bot->msg_struct;
     adjust_channel();
 
     bool demimic_all = false;
-    for(int i(0); i < mes_struct.mods.size(); i++)
+    for(int i(0); i < msg_struct.mods.size(); i++)
     {
-        if(mes_struct.mods[i] == "-a")
+        if(msg_struct.mods[i] == "-a")
         {demimic_all=true;}
     }
     if(demimic_all == true)
     {
         if(nicks_mimic.empty())
-        {bot->privmsg(s_mes_struct.channel,"No one to demimic.");}
+        {bot->privmsg(s_msg_struct.channel,"No one to demimic.");}
         else
         {m_fs.pig_lat = false;
             for(int i(0); i < nicks_mimic.size(); i++)
-            {bot->privmsg(s_mes_struct.channel,"Not mimicing what "+nicks_mimic[i]+" says.");}
+            {bot->privmsg(s_msg_struct.channel,"Not mimicing what "+nicks_mimic[i]+" says.");}
             nick_map.clear();
             nicks_mimic.clear();
         }
     }
     else
     {
-        if(mes_struct.args.size() == 0)
-        {mes_struct.args.push_back(s_mes_struct.nick);}   //Saves not having to create a new condition
+        if(msg_struct.args.size() == 0)
+        {msg_struct.args.push_back(s_msg_struct.nick);}   //Saves not having to create a new condition
 
-        for(int i(0); i < mes_struct.args.size(); i++)
+        for(int i(0); i < msg_struct.args.size(); i++)
         {
             auto iter = nicks_mimic.end();
-            if((iter = std::find(nicks_mimic.begin(), nicks_mimic.end(),mes_struct.args[i])) != nicks_mimic.end())
+            if((iter = std::find(nicks_mimic.begin(), nicks_mimic.end(),msg_struct.args[i])) != nicks_mimic.end())
             {
-                bot->privmsg(s_mes_struct.channel,"Not mimicing what "+mes_struct.args[i]+" says.");
-                nick_map.erase(mes_struct.args.at(i));
+                bot->privmsg(s_msg_struct.channel,"Not mimicing what "+msg_struct.args[i]+" says.");
+                nick_map.erase(msg_struct.args.at(i));
                 nicks_mimic.erase(iter);
             }
         }
@@ -145,17 +145,17 @@ void ircMimic::demimic()
 
 void ircMimic::mimic_handler()
 {
-    s_mes_struct = bot->s_mes_struct;
+    s_msg_struct = bot->s_msg_struct;
     adjust_channel();
 
-    if(s_mes_struct.message.at(0)!=mes_struct.ident)
+    if(s_msg_struct.msg.at(0)!=msg_struct.ident)
     {
-        if(std::find(nicks_mimic.begin(), nicks_mimic.end(),s_mes_struct.nick) != nicks_mimic.end())
+        if(std::find(nicks_mimic.begin(), nicks_mimic.end(),s_msg_struct.nick) != nicks_mimic.end())
         {
-            if(nick_map.at(s_mes_struct.nick).pig_lat)
-            {s_mes_struct.message = pig_latin(s_mes_struct.message);}
+            if(nick_map.at(s_msg_struct.nick).pig_lat)
+            {s_msg_struct.msg = pig_latin(s_msg_struct.msg);}
 
-            bot->privmsg(s_mes_struct.channel,s_mes_struct.message);
+            bot->privmsg(s_msg_struct.channel,s_msg_struct.msg);
         }
     }
 }
@@ -217,9 +217,9 @@ std::string ircMimic::pig_latin(std::string text)
 
 bool ircMimic::adjust_channel()
 {
-    if(s_mes_struct.nick_flag)
+    if(s_msg_struct.nick_flag)
     {
-        s_mes_struct.channel = s_mes_struct.nick;
+        s_msg_struct.channel = s_msg_struct.nick;
         return true;
     }
     return false;
