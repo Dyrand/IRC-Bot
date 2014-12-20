@@ -127,7 +127,7 @@ std::string ircMimic::pig_latin(std::string text)
     bool npos_reached = false;
 
     //Find spaces within text
-    for(int i(0); npos_reached == false; i++)
+    for(size_t i(0); npos_reached == false; i++)
     {
         i = text.find(" ",i);
         if(i != text.npos)

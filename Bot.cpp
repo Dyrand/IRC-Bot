@@ -228,7 +228,7 @@ void Bot::parseServerMsg()
         s_msg_struct.adjust_channel();
     }
     else
-    {s_msg_struct.msg_target = channel;}
+    {s_msg_struct.msg_target = s_msg_struct.channel;}
 
     //std::cout << "prefix  :" << s_msg_struct.prefix   << "\n";
     //std::cout << "command :" << s_msg_struct.command  << "\n";
