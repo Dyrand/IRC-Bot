@@ -102,16 +102,19 @@ void ircMimic::demimic()
 void ircMimic::mimic_handler()
 {
     bot->getMsgStructs(s_msg_struct,msg_struct);
-    if(msg_struct.msg.at(0) != msg_struct.ident)
+    if(!msg_struct.msg.empty())
     {
-        if(std::find(nicks_mimic.begin(), nicks_mimic.end(),s_msg_struct.nick) != nicks_mimic.end())
+        if((msg_struct.msg.at(0) != msg_struct.ident) && (s_msg_struct.command == "PRIVMSG"))
         {
-            if(nick_map.at(s_msg_struct.nick).pig_lat > 0)
+            if(std::find(nicks_mimic.begin(), nicks_mimic.end(),s_msg_struct.nick) != nicks_mimic.end())
             {
-                for(int i(0); i < nick_map.at(s_msg_struct.nick).pig_lat; i++)
-                {msg_struct.msg = pig_latin(msg_struct.msg);std::cout << msg_struct.msg << "\n";}
+                if(nick_map.at(s_msg_struct.nick).pig_lat > 0)
+                {
+                    for(int i(0); i < nick_map.at(s_msg_struct.nick).pig_lat; i++)
+                    {msg_struct.msg = pig_latin(msg_struct.msg);std::cout << msg_struct.msg << "\n";}
+                }
+                bot->privmsg(s_msg_struct.msg_target,msg_struct.msg);
             }
-            bot->privmsg(s_msg_struct.msg_target,msg_struct.msg);
         }
     }
 }
