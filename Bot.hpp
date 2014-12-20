@@ -50,14 +50,17 @@ class Bot
         /*Objects for commands*/
         ircMimic mimic_o;
 
+
+
+        /*Get functions*/
+        std::string getNick();
+        void getMsgStructs(serverMsgStruct& s_msg_struct_t, msgStruct& msg_struct_t);
+
+    private:
+
         /*Message Structure objects*/
         serverMsgStruct s_msg_struct; //server_message_struct
         msgStruct         msg_struct; //message_struct
-
-        /*Get functions*/
-        std::string getnick();
-
-    private:
 
         bool stay_conned;
 

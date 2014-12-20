@@ -19,14 +19,12 @@ class ircMimic
         void mimic_handler();
         bool mimicing();
 
-        void mimic_description();
-        void demimic_description();
+        //void mimic_description();
+        //void demimic_description();
 
-        bool mim_check_conf_mods(); //checks if any mimic modifies conflict
-        void mim_mods_reset();      //resets mimic modifiers to false
+        void mim_mods_reset();      //resets mimic modifiers to 0
+        void demim_mods_reset();    //resets demimic modifiers to 0
         //bool demim_check_conf_mods(); //checks if any demimic modifies conflict
-
-        bool adjust_channel(); //replace channel with nickname if the channel var contains a nickname
 
     private:
 
@@ -38,24 +36,17 @@ class ircMimic
         msgStruct         msg_struct;
 
         //Flags mimic
-        struct flags_m
+        struct user_flags
         {
-            flags_m():
-                pig_lat(false),
-                desc(false),
-                edit(false)
-            {}
-            bool pig_lat; //pig latin
-            bool desc;    //decription
-            bool edit;    //used to edit modifiers attached to currenct mimic
-        }m_fs;
+            int pig_lat = 0; //pig latin
+        }user_f;
 
         //Flags demimic
-        bool demimic_all = false;
-        bool demim_desc = false;
+        int demim_all = 0;
+
 
         std::vector<std::string> nicks_mimic; //nicknames that are being mimiced
-        std::map<std::string,flags_m> nick_map;
+        std::map<std::string,user_flags> nick_map;
 
 };
 

@@ -219,6 +219,17 @@ void Bot::parseServerMsg()
     for(unsigned int i(1); i < (s_msg_struct.space_pos.size()-1); i++)
     {s_msg_struct.args.emplace_back(rec_string.substr(s_msg_struct.space_pos.at(i)+1,s_msg_struct.space_pos.at(i+1)-s_msg_struct.space_pos.at(i)));}
 
+
+
+    //Check if nick_flag should be set and what the msg_target should be
+    if(s_msg_struct.channel.find('#') == std::string::npos)
+    {
+        s_msg_struct.nick_flag = true;
+        s_msg_struct.adjust_channel();
+    }
+    else
+    {s_msg_struct.msg_target = channel;}
+
     //std::cout << "prefix  :" << s_msg_struct.prefix   << "\n";
     //std::cout << "command :" << s_msg_struct.command  << "\n";
     //std::cout << "channel :" << s_msg_struct.channel  << "\n";
@@ -302,14 +313,13 @@ void Bot::parseMsg()
     //{std::cout << "Modifier"<< i << ":" << msg_struct.mods.at(i) << "\n";}
 }
 
-
 void Bot::checkCommands()
 {
     if(msg_struct.command == "mimic")
     {mimic_o.mimic();}
     else if(msg_struct.command == "demimic")
     {mimic_o.demimic();}
-    else if(msg_struct.command == "discon")
+    if(msg_struct.command == "discon")
     {discon();}
     else if(msg_struct.command == ">")
     {rawInput();}
@@ -367,10 +377,20 @@ void Bot::rawInput()
     if(s_msg_struct.nick == Dyrand)
     {send(msg_struct.postfix);}
     else
-    {privmsg(s_msg_struct.channel,"\1ACTION tells "+s_msg_struct.nick+" that the \">>\" command is only for: "+Dyrand+".\1");}
+    {privmsg(s_msg_struct.msg_target,"\1ACTION tells "+s_msg_struct.nick+" that the \">>\" command is only for: "+Dyrand+".\1");}
 }
 
-std::string Bot::getnick()
+
+
+/*  Get Functions for Bot class */
+
+std::string Bot::getNick()
 {return nick;}
+
+void Bot::getMsgStructs(serverMsgStruct& s_msg_struct_t, msgStruct& msg_struct_t)
+{
+    s_msg_struct_t = s_msg_struct;
+    msg_struct_t = msg_struct;
+}
 
 

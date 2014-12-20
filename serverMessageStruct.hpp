@@ -8,6 +8,7 @@ struct serverMsgStruct
 {
     serverMsgStruct& operator=(serverMsgStruct);
     void reset();
+    void adjust_channel(); //Changes s_msg_struct msg_target from channel to nick if nick_flag is true
 
     std::vector<std::string> args;
     std::vector<int> space_pos;
@@ -18,6 +19,7 @@ struct serverMsgStruct
     std::string command;
     std::string channel;
     std::string msg;
+    std::string msg_target;
 
     size_t prefix_end_pos = std::string::npos;
     size_t msg_start_pos  = std::string::npos;
