@@ -13,7 +13,7 @@ Bot::Bot():
     mimic_o(this),
     stay_conned(true),
     conn_pwd("password"),
-    nick("Dyramic"),
+    nick("Dyramica"),
     user("dyramic"),
     real("dyramic"),
     mode("0"),
@@ -140,12 +140,17 @@ void Bot::join(std::string channel_t)
 void Bot::join()
 {send("JOIN "+channel);}
 
+void Bot::part(std::string channel_t)
+{
+    channel = channel_t;
+    send("PART "+channel);
+}
+
 void Bot::quit(std::string send_msg_t)
 {
     send_msg = send_msg_t;
     send("QUIT "+send_msg);
 }
-
 
 
 void Bot::parseServerMsg()
@@ -319,8 +324,12 @@ void Bot::checkCommands()
     {mimic_o.mimic();}
     else if(msg_struct.command == "demimic")
     {mimic_o.demimic();}
-    if(msg_struct.command == "discon")
+    else if(msg_struct.command == "discon")
     {discon();}
+    else if(msg_struct.command == "join")
+    {join_c();}
+    else if(msg_struct.command == "part")
+    {part_c();}
     else if(msg_struct.command == ">")
     {rawInput();}
 }
@@ -370,6 +379,24 @@ void Bot::discon()
 {
     if(s_msg_struct.nick == Dyrand)
     {stay_conned = false;}
+}
+
+void Bot::join_c()
+{
+    if(s_msg_struct.nick == Dyrand)
+    {
+        for(unsigned int i(0);  i < msg_struct.args.size(); i++)
+        {join(msg_struct.args.at(i));}
+    }
+}
+
+void Bot::part_c()
+{
+    if(s_msg_struct.nick == Dyrand)
+    {
+        for(unsigned int i(0);  i < msg_struct.args.size(); i++)
+        {part(msg_struct.args.at(i));}
+    }
 }
 
 void Bot::rawInput()

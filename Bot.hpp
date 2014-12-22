@@ -33,6 +33,7 @@ class Bot
         void privmsg(std::string channel_t, std::string msg_t);
         void join(std::string channel_t);
         void join();
+        void part(std::string channel_t);
         void quit(std::string msg);
 
         void parseServerMsg();
@@ -46,6 +47,8 @@ class Bot
         /*Simple Commands*/ //most likely can remain in ircBotClass
         void discon();
         void rawInput();
+        void join_c();
+        void part_c();
 
         /*Objects for commands*/
         ircMimic mimic_o;
