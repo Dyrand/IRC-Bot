@@ -17,7 +17,7 @@ Bot::Bot():
     user("dyramic"),
     real("dyramic"),
     mode("0"),
-    target_channel("#cplusplus.com"),
+    target_channel("botdever"),
     target_server("irc.freenode.com"),
     target_port(8001)
 {}
