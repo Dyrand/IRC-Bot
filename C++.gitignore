@@ -21,6 +21,8 @@
 *.exe
 *.out
 *.app
+# Scripts
+*.sh
 #Code::Blocks Project Files
 *.layout
 *.depend

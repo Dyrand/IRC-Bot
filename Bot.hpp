@@ -16,25 +16,27 @@ class Bot
         Bot();
 
         //Establishing Connections
-        int connServer(std::string server_t, int port_t);
-        int connServer();
-        void connReg(std::string conn_pwd_t, std::string nick_t, std::string username_t );
-        void connReg();
+        int connectServer(std::string server_t, int port_t);
+        int connectServer();
+        void registerConnection(std::string conn_pwd_t, std::string nick_t, std::string username_t );
+        void registerConnection();
 
         //Outputs text depending on what status is
-        int statusSwitch(sf::Socket::Status status_t);
-        int statusSwitch();
+        int updateStatus(sf::Socket::Status status_t);
+        int outputStatus();
 
         //Send and Receive
         void send(std::string formated_text);
         void receive();
 
         //Basic IRC commands
-        void privmsg(std::string channel_t, std::string msg_t);
+        void privmsg(std::string channel_t, std::string send_msg_t);
+        void privmsg(std::string msg_t);
         void join(std::string channel_t);
         void join();
         void part(std::string channel_t);
-        void quit(std::string msg);
+        void quit(std::string msg_t);
+        void quit();
 
         void parseServerMsg();
         void parseMsg();
@@ -65,7 +67,7 @@ class Bot
         serverMsgStruct s_msg_struct; //server_message_struct
         msgStruct         msg_struct; //message_struct
 
-        bool stay_conned;
+        bool stay_connected;
 
         long unsigned int bytes_rec;
         std::array<char,512> rec_text;
@@ -76,7 +78,7 @@ class Bot
         std::string temp_string;
         unsigned int string_length;
 
-        bool part_flag = false;
+        bool partial_flag = false;
 
         size_t rn_pos    = std::string::npos; // "\r\n"
         size_t space_pos = std::string::npos; // " "
@@ -85,7 +87,8 @@ class Bot
 
         sf::Socket::Status status;
         sf::TcpSocket      socket;
-
+        
+        std::string connection_password;
         std::string conn_pwd;
         std::string nick;
         std::string user;
@@ -93,9 +96,11 @@ class Bot
         std::string mode;
 
         std::string send_msg;
+        std::string target_channel;
         std::string channel;
+        std::string target_server;
         std::string server;
-        int port;
+        int target_port;
 
         //Dyrand
         const std::string Dyrand = "Dyrand";

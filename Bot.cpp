@@ -11,49 +11,52 @@
 
 Bot::Bot():
     mimic_o(this),
-    stay_conned(true),
-    conn_pwd("password"),
+    stay_connected(true),
+    connection_password("password"),
     nick("Dyramica"),
     user("dyramic"),
     real("dyramic"),
     mode("0"),
-    channel("#botdever"),
-    server("irc.freenode.com"),
-    port(8001)
+    target_channel("#cplusplus.com"),
+    target_server("irc.freenode.com"),
+    target_port(8001)
 {}
 
-int Bot::connServer(std::string server_t, int port_t)
+int Bot::connectServer(std::string server_t, int port_t)
 {
-    server = server_t;
-    port   = port_t;
-    return connServer();
+    target_server = server_t;
+    target_port   = port_t;
+    return connectServer();
 }
 
-int Bot::connServer()
-{return statusSwitch(socket.connect(server,port));}
-
-void Bot::connReg(std::string conn_pwd_t, std::string nick_t, std::string user_t)
+int Bot::connectServer()
 {
-    conn_pwd = conn_pwd_t;
+    updateStatus(socket.connect(target_server,target_port));
+    return outputStatus();
+}
+
+void Bot::registerConnection(std::string connection_password_t, std::string nick_t, std::string user_t)
+{
+    connection_password = connection_password_t;
     nick = nick_t;
     user = user_t;
-    return connReg();
+    registerConnection();
 }
 
-void Bot::connReg()
+void Bot::registerConnection()
 {
     send("PASS "+conn_pwd);
     send("NICK "+nick);
     send("USER "+user+" "+mode+" * :"+real);
 }
 
-int Bot::statusSwitch(sf::Socket::Status status_t)
+int Bot::updateStatus(sf::Socket::Status status_t)
 {
     status = status_t;
-    return statusSwitch();
+    return outputStatus();
 }
 
-int Bot::statusSwitch()
+int Bot::outputStatus()
 {
     switch(status)
     {
@@ -73,7 +76,7 @@ int Bot::statusSwitch()
     break;
 
     case sf::Socket::Error:
-
+    
     default:
         std::cout << "Error connecting to " << server << ".\n";
         return sf::Socket::Error;
@@ -98,12 +101,12 @@ void Bot::receive()
 
     //Appends one partial strings to another
     rn_pos = rec_string.find("\r\n");
-    if(part_flag && (rn_pos != rec_string.npos))
+    if(partial_flag && (rn_pos != rec_string.npos))
     {
         parsable_strings.emplace_back(part_string+(rec_string.substr(0,rn_pos+2)));
         rec_string.erase(0,rn_pos+2);
         part_string.clear();
-        part_flag = false;
+        partial_flag = false;
     }
 
     //Split strings on "\r\n" positions and removes characters until there is no "\r\n" left
@@ -118,7 +121,7 @@ void Bot::receive()
     {
         part_string.assign(rec_string);
         rec_string.clear();
-        part_flag = true;
+        partial_flag = true;
     }
 
     rec_text.fill('\0');
@@ -126,19 +129,24 @@ void Bot::receive()
 
 void Bot::privmsg(std::string channel_t, std::string send_msg_t)
 {
-    channel = channel_t;
+    target_channel = channel_t;
+    privmsg(send_msg_t);
+}
+
+void Bot::privmsg(std::string send_msg_t)
+{
     send_msg = send_msg_t;
-    send("PRIVMSG "+channel+" :"+send_msg);
+    send("PRIVMSG "+target_channel+" :"+send_msg);
 }
 
 void Bot::join(std::string channel_t)
 {
-    channel = channel_t;
+    target_channel = channel_t;
     join();
 }
 
 void Bot::join()
-{send("JOIN "+channel);}
+{send("JOIN "+target_channel);}
 
 void Bot::part(std::string channel_t)
 {
@@ -150,6 +158,11 @@ void Bot::quit(std::string send_msg_t)
 {
     send_msg = send_msg_t;
     send("QUIT "+send_msg);
+}
+
+void Bot::quit()
+{
+    send("QUIT gotta go fast!");
 }
 
 
@@ -370,7 +383,7 @@ void Bot::loop()
                 resetVars();
             }
         }parsable_strings.clear();
-    }while(stay_conned==true);
+    }while(stay_connected==true);
     quit("Ever want to look more like?");
     socket.disconnect();
 }
@@ -378,7 +391,7 @@ void Bot::loop()
 void Bot::discon()
 {
     if(s_msg_struct.nick == Dyrand)
-    {stay_conned = false;}
+    {stay_connected = false;}
 }
 
 void Bot::join_c()

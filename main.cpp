@@ -6,9 +6,9 @@ int main()
 {
     Bot bot;
 
-    if(bot.connServer()==sf::Socket::Done)
+    if(bot.connectServer()==sf::Socket::Done)
     {
-        bot.connReg();
+        bot.registerConnection();
         bot.join();
         bot.loop();
     }
