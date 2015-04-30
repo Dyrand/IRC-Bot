@@ -23,6 +23,7 @@
 *.app
 # Scripts
 *.sh
+*.bat
 #Code::Blocks Project Files
 *.layout
 *.depend
