@@ -18,7 +18,7 @@ class Bot
         //Establishing Connections
         int connectServer(std::string server_t, int port_t);
         int connectServer();
-        void registerConnection(std::string conn_pwd_t, std::string nick_t, std::string username_t );
+        void registerConnection(std::string connection_password_t, std::string nickname_t, std::string username_t, std::string realname_t);
         void registerConnection();
 
         //Outputs text depending on what status is
@@ -58,7 +58,7 @@ class Bot
 
 
         /*Get functions*/
-        std::string getNick();
+        std::string getNickname();
         void getMsgStructs(serverMsgStruct& s_msg_struct_t, msgStruct& msg_struct_t);
 
     private:
@@ -70,16 +70,18 @@ class Bot
         bool stay_connected;
 
         long unsigned int bytes_rec;
-        std::array<char,512> rec_text;
+        std::array<char,512> text_received;
         std::vector<std::string> parsable_strings;
-        std::string rec_string;
+        std::string string_received;
 
-        std::string part_string;
+        std::string partial_string;
         std::string temp_string;
+        
         unsigned int string_length;
 
-        bool partial_flag = false;
-
+        bool isStringPartial = false;
+        bool isStatusOutputOpen = false;
+        
         size_t rn_pos    = std::string::npos; // "\r\n"
         size_t space_pos = std::string::npos; // " "
         size_t excl_pos  = std::string::npos; // "!"
@@ -89,13 +91,12 @@ class Bot
         sf::TcpSocket      socket;
         
         std::string connection_password;
-        std::string conn_pwd;
-        std::string nick;
+        std::string nickname;
         std::string user;
-        std::string real;
+        std::string realname;
         std::string mode;
 
-        std::string send_msg;
+        std::string send_message;
         std::string target_channel;
         std::string channel;
         std::string target_server;

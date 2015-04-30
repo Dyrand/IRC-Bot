@@ -22,18 +22,18 @@ void ircMimic::mimic()
     }
 
     if(msg_struct.args.empty())
-    {msg_struct.args.push_back(s_msg_struct.nick);}   //Saves not having to create a new condition
+    {msg_struct.args.push_back(s_msg_struct.nickname);}   //Saves not having to create a new condition
 
     for(unsigned int i(0); i < msg_struct.args.size(); i++)
     {
-        if(msg_struct.args.at(i) == bot->getNick()){}//the bot will not mimic it self
+        if(msg_struct.args.at(i) == bot->getNickname()){}//the bot will not mimic it self
 
-        else if(std::find(nicks_mimic.begin(),nicks_mimic.end(),msg_struct.args.at(i)) != nicks_mimic.end())
+        else if(std::find(nicknames_mimic.begin(),nicknames_mimic.end(),msg_struct.args.at(i)) != nicknames_mimic.end())
         {bot->privmsg(s_msg_struct.msg_target,"Already mimicing what "+msg_struct.args.at(i)+" says.");}
         else
         {
-            nicks_mimic.push_back(msg_struct.args.at(i));
-            nick_map.emplace(msg_struct.args.at(i),user_f);
+            nicknames_mimic.push_back(msg_struct.args.at(i));
+            nickname_map.emplace(msg_struct.args.at(i),user_f);
             bot->privmsg(s_msg_struct.msg_target,"Now mimicing what "+msg_struct.args.at(i)+" says.");
         }
     }
@@ -69,29 +69,29 @@ void ircMimic::demimic()
 
     if(demim_all)
     {
-        if(nicks_mimic.empty())
+        if(nicknames_mimic.empty())
         {bot->privmsg(s_msg_struct.msg_target,"No one to demimic.");}
         else
         {
-            for(unsigned int i(0); i < nicks_mimic.size(); i++)
-            {bot->privmsg(s_msg_struct.msg_target,"Not mimicing what "+nicks_mimic.at(i)+" says.");}
-            nick_map.clear();
-            nicks_mimic.clear();
+            for(unsigned int i(0); i < nicknames_mimic.size(); i++)
+            {bot->privmsg(s_msg_struct.msg_target,"Not mimicing what "+nicknames_mimic.at(i)+" says.");}
+            nickname_map.clear();
+            nicknames_mimic.clear();
         }
     }
     else
     {
         if(msg_struct.args.empty())
-        {msg_struct.args.push_back(s_msg_struct.nick);}   //Saves not having to create a new condition
+        {msg_struct.args.push_back(s_msg_struct.nickname);}   //Saves not having to create a new condition
 
         for(unsigned int i(0); i < msg_struct.args.size(); i++)
         {
-            auto iter = nicks_mimic.end();
-            if((iter = std::find(nicks_mimic.begin(), nicks_mimic.end(),msg_struct.args[i])) != nicks_mimic.end())
+            auto iter = nicknames_mimic.end();
+            if((iter = std::find(nicknames_mimic.begin(), nicknames_mimic.end(),msg_struct.args[i])) != nicknames_mimic.end())
             {
                 bot->privmsg(s_msg_struct.msg_target,"Not mimicing what "+msg_struct.args[i]+" says.");
-                nick_map.erase(msg_struct.args.at(i));
-                nicks_mimic.erase(iter);
+                nickname_map.erase(msg_struct.args.at(i));
+                nicknames_mimic.erase(iter);
             }
         }
     }
@@ -106,11 +106,11 @@ void ircMimic::mimic_handler()
     {
         if((msg_struct.msg.at(0) != msg_struct.ident) && (s_msg_struct.command == "PRIVMSG"))
         {
-            if(std::find(nicks_mimic.begin(), nicks_mimic.end(),s_msg_struct.nick) != nicks_mimic.end())
+            if(std::find(nicknames_mimic.begin(), nicknames_mimic.end(),s_msg_struct.nickname) != nicknames_mimic.end())
             {
-                if(nick_map.at(s_msg_struct.nick).pig_lat > 0)
+                if(nickname_map.at(s_msg_struct.nickname).pig_lat > 0)
                 {
-                    for(int i(0); i < nick_map.at(s_msg_struct.nick).pig_lat; i++)
+                    for(int i(0); i < nickname_map.at(s_msg_struct.nickname).pig_lat; i++)
                     {msg_struct.msg = pig_latin(msg_struct.msg);std::cout << msg_struct.msg << "\n";}
                 }
                 bot->privmsg(s_msg_struct.msg_target,msg_struct.msg);
@@ -120,7 +120,7 @@ void ircMimic::mimic_handler()
 }
 
 bool ircMimic::mimicing()
-{return (!nicks_mimic.empty());}
+{return (!nicknames_mimic.empty());}
 
 std::string ircMimic::pig_latin(std::string text)
 {

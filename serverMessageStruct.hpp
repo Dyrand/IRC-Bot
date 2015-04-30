@@ -15,7 +15,7 @@ struct serverMsgStruct
 
     std::string prefix;
     std::string user;
-    std::string nick;
+    std::string nickname;
     std::string command;
     std::string channel;
     std::string msg;
@@ -24,7 +24,7 @@ struct serverMsgStruct
     size_t prefix_end_pos = std::string::npos;
     size_t msg_start_pos  = std::string::npos;
 
-    bool nick_flag = false; //used to note that channel name actually contains a nickname, e.g. /msg
+    bool nickname_flag = false; //used to note that channel name actually contains a nickname, e.g. /msg
 };
 
 struct msgStruct

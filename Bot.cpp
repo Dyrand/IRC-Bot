@@ -13,7 +13,7 @@ Bot::Bot():
     mimic_o(this),
     stay_connected(true),
     connection_password("password"),
-    nick("Dyramica"),
+    nickname("Dyramica"),
     user("dyramic"),
     real("dyramic"),
     mode("0"),
@@ -35,19 +35,20 @@ int Bot::connectServer()
     return outputStatus();
 }
 
-void Bot::registerConnection(std::string connection_password_t, std::string nick_t, std::string user_t)
+void Bot::registerConnection(std::string connection_password_t, std::string nickname_t, std::string user_t, std::string realname_t)
 {
     connection_password = connection_password_t;
-    nick = nick_t;
+    nickname = nickname_t;
     user = user_t;
+    realname = realname_t;
     registerConnection();
 }
 
 void Bot::registerConnection()
 {
-    send("PASS "+conn_pwd);
-    send("NICK "+nick);
-    send("USER "+user+" "+mode+" * :"+real);
+    send("PASS "+connection_password);
+    send("NICK "+nickname);
+    send("USER "+user+" "+mode+" * :"+realname);
 }
 
 int Bot::updateStatus(sf::Socket::Status status_t)
@@ -58,85 +59,91 @@ int Bot::updateStatus(sf::Socket::Status status_t)
 
 int Bot::outputStatus()
 {
-    switch(status)
+    if(isStatusOutputOpen)
     {
-    case sf::Socket::Done:
-        std::cout << "Connection to " << server << " done.\n";
-        return sf::Socket::Done;
-    break;
-
-    case sf::Socket::NotReady:
-        std::cout << "Connection to " << server << "not ready.\n";
-        return sf::Socket::NotReady;
-    break;
-
-    case sf::Socket::Disconnected:
-        std::cout << "Disconnected from " << server << ".\n";
-        return sf::Socket::Disconnected;
-    break;
-
-    case sf::Socket::Error:
+        switch(status)
+        {
+        case sf::Socket::Done:
+            std::cout << "Connection to " << server << " done.\n";
+            return sf::Socket::Done;
+        break;
     
-    default:
-        std::cout << "Error connecting to " << server << ".\n";
-        return sf::Socket::Error;
-    break;
+        case sf::Socket::NotReady:
+            std::cout << "Connection to " << server << "not ready.\n";
+            return sf::Socket::NotReady;
+        break;
+    
+        case sf::Socket::Disconnected:
+            std::cout << "Disconnected from " << server << ".\n";
+            return sf::Socket::Disconnected;
+        break;
+    
+        case sf::Socket::Error:
+        
+        default:
+            std::cout << "Error connecting to " << server << ".\n";
+            return sf::Socket::Error;
+        break;
+        }
     }
 }
 
-void Bot::send(std::string send_msg_t)
+int Bot::send(std::string send_message_t)
 {
-    send_msg = send_msg_t;
-    send_msg.append("\r\n");
-    std::cout << send_msg;
-    status = socket.send(send_msg.c_str(),send_msg.size());
+    send_message = send_message_t;
+    send_message.append("\r\n");
+    std::cout << send_message;
+    updateStatus(socket.send(send_message.c_str(),send_message.size());
+    return status;
 }
 
 //Using A TCPsocket, divide a message based on "\r\n" position, messages without a "\r\n" at the end is regarded as
 //a partial string and saved for combining
 void Bot::receive()
 {
-    status = socket.receive(rec_text.data(),rec_text.size(),bytes_rec);
-    rec_string.assign(rec_text.begin(),rec_text.begin()+bytes_rec);
+    updateStatus(socket.receive(text_received.data(),text_received.size(),bytes_rec));
+    recieve_string.assign(text_received.begin(),text_received.begin()+bytes_rec);
 
     //Appends one partial strings to another
-    rn_pos = rec_string.find("\r\n");
-    if(partial_flag && (rn_pos != rec_string.npos))
+    rn_pos = string_received.find("\r\n");
+    if(isStringPartial && (rn_pos != string_received.npos))
     {
-        parsable_strings.emplace_back(part_string+(rec_string.substr(0,rn_pos+2)));
-        rec_string.erase(0,rn_pos+2);
-        part_string.clear();
-        partial_flag = false;
+        temp_string = string_received.substr(0,rn_pos+2);
+        parsable_strings.emplace_back(partial_string+temp_string);
+        string_received.erase(0,rn_pos+2);
+        partial_string.clear();
+        isStringPartial = false;
     }
 
     //Split strings on "\r\n" positions and removes characters until there is no "\r\n" left
-    while((rn_pos = rec_string.find("\r\n")) != rec_string.npos)
+    while((rn_pos = string_received.find("\r\n")) != string_received.npos)
     {
-        parsable_strings.emplace_back(rec_string.substr(0,rn_pos+2));
-        rec_string.erase(0,rn_pos+2);
+        temp_string = string_received.substr(0,rn_pos+2)
+        parsable_strings.emplace_back(temp_string);
+        string_received.erase(0,rn_pos+2);
     }
 
     //If there is no "\r\n" left, but there are charcters still left in the string, it is a partial string
-    if(!rec_string.empty())
+    if(string_received.empty() == false)
     {
-        part_string.assign(rec_string);
-        rec_string.clear();
-        partial_flag = true;
+        partial_string.assign(string_received);
+        string_received.clear();
+        isStringPartial = true;
     }
 
-    rec_text.fill('\0');
+    text_received.fill('\0');
 }
 
-void Bot::privmsg(std::string channel_t, std::string send_msg_t)
+void Bot::privmsg(std::string channel_t, std::string send_message_t)
 {
     target_channel = channel_t;
-    privmsg(send_msg_t);
+    privmsg(send_message_t);
 }
 
-void Bot::privmsg(std::string send_msg_t)
+void Bot::privmsg(std::string send_message_t)
 {
-    send_msg = send_msg_t;
-    send("PRIVMSG "+target_channel+" :"+send_msg);
+    send_message = send_message_t;
+    send("PRIVMSG "+target_channel+" :"+send_message);
 }
 
 void Bot::join(std::string channel_t)
@@ -154,10 +161,10 @@ void Bot::part(std::string channel_t)
     send("PART "+channel);
 }
 
-void Bot::quit(std::string send_msg_t)
+void Bot::quit(std::string send_message_t)
 {
-    send_msg = send_msg_t;
-    send("QUIT "+send_msg);
+    send_message = send_message_t;
+    send("QUIT "+send_message);
 }
 
 void Bot::quit()
@@ -183,48 +190,48 @@ void Bot::parseServerMsg()
 //ERROR :Closing Link: 127.0.0.1 (Connection timed out)
 //HYPOTHETICALMESSAGE  /*no space and no : or !
 
-    std::cout << rec_string;
+    std::cout << string_received;
 
-    if((rn_pos = rec_string.find("\r\n")) == std::string::npos)
+    if((rn_pos = string_received.find("\r\n")) == std::string::npos)
     {std::cout << "Receive string does not contain \"\\r\\n\".";}
 
     //Gets the prefix if there is one
-    if(rec_string.front() == ':')
+    if(string_received.front() == ':')
     {
-        if((s_msg_struct.prefix_end_pos = rec_string.find(' ')) != std::string::npos)
-        {s_msg_struct.prefix = rec_string.substr(1,s_msg_struct.prefix_end_pos);}
+        if((s_msg_struct.prefix_end_pos = string_received.find(' ')) != std::string::npos)
+        {s_msg_struct.prefix = string_received.substr(1,s_msg_struct.prefix_end_pos);}
         else{std::cout << "Receive string does not contain a space.\n";}
     }else{std::cout << "Receive string does not start with a ':'.\n";}
 
     //Gets the message if there is one
-    if((s_msg_struct.msg_start_pos = rec_string.find(" :")) != std::string::npos)
-    {s_msg_struct.msg = rec_string.substr(s_msg_struct.msg_start_pos+2,(rn_pos-s_msg_struct.msg_start_pos)-2);}
+    if((s_msg_struct.msg_start_pos = string_received.find(" :")) != std::string::npos)
+    {s_msg_struct.msg = string_received.substr(s_msg_struct.msg_start_pos+2,(rn_pos-s_msg_struct.msg_start_pos)-2);}
     else
     {
         std::cout << "Receive string does not contain a message.\n";
         //padding for correctly getting the last block of text
-        rec_string.insert(rn_pos," ");
+        string_received.insert(rn_pos," ");
         s_msg_struct.msg_start_pos = rn_pos;
     }
 
     //Find all the spaces between prefix_end_pos and mes_start_pos
     space_pos = s_msg_struct.prefix_end_pos;
-    while((space_pos = rec_string.find(' ',++space_pos)) < s_msg_struct.msg_start_pos)
+    while((space_pos = string_received.find(' ',++space_pos)) < s_msg_struct.msg_start_pos)
     {s_msg_struct.space_pos.emplace_back(space_pos);}
 
-    //Padding for collecting last string in rec_string apart from message
+    //Padding for collecting last string in string_received apart from message
     s_msg_struct.space_pos.emplace_back(s_msg_struct.msg_start_pos);
 
     //Gets the command in the message
-    s_msg_struct.command = rec_string.substr(s_msg_struct.prefix_end_pos+1,(s_msg_struct.space_pos.at(0)-s_msg_struct.prefix_end_pos)-1);
+    s_msg_struct.command = string_received.substr(s_msg_struct.prefix_end_pos+1,(s_msg_struct.space_pos.at(0)-s_msg_struct.prefix_end_pos)-1);
 
     //Implies the 2nd piece after the message is a channel or nickname, both go to channel var though
     if(s_msg_struct.space_pos.size() >= 2)
-    {s_msg_struct.channel = rec_string.substr(s_msg_struct.space_pos.at(0)+1,(s_msg_struct.space_pos.at(1)-s_msg_struct.space_pos.at(0))-1);}
+    {s_msg_struct.channel = string_received.substr(s_msg_struct.space_pos.at(0)+1,(s_msg_struct.space_pos.at(1)-s_msg_struct.space_pos.at(0))-1);}
 
     //Parse the prefix into nickname and username if possible
     if((excl_pos = s_msg_struct.prefix.find('!')) != std::string::npos)
-    {s_msg_struct.nick = s_msg_struct.prefix.substr(0,excl_pos);}
+    {s_msg_struct.nickname = s_msg_struct.prefix.substr(0,excl_pos);}
     if((at_pos = s_msg_struct.prefix.find('@')) != std::string::npos)
     {
         if(s_msg_struct.prefix.at(excl_pos+1) == '~')
@@ -235,14 +242,14 @@ void Bot::parseServerMsg()
 
     //The rest of the stuff left between spaces is put into a string vector
     for(unsigned int i(1); i < (s_msg_struct.space_pos.size()-1); i++)
-    {s_msg_struct.args.emplace_back(rec_string.substr(s_msg_struct.space_pos.at(i)+1,s_msg_struct.space_pos.at(i+1)-s_msg_struct.space_pos.at(i)));}
+    {s_msg_struct.args.emplace_back(string_received.substr(s_msg_struct.space_pos.at(i)+1,s_msg_struct.space_pos.at(i+1)-s_msg_struct.space_pos.at(i)));}
 
 
 
     //Check if nick_flag should be set and what the msg_target should be
     if(s_msg_struct.channel.find('#') == std::string::npos)
     {
-        s_msg_struct.nick_flag = true;
+        s_msg_struct.nickname_flag = true;
         s_msg_struct.adjust_channel();
     }
     else
@@ -369,8 +376,8 @@ void Bot::loop()
         receive();
         for(unsigned int i(0); i < parsable_strings.size(); i++)
         {
-            rec_string = parsable_strings.at(i);
-            if(!rec_string.empty())
+            string_received = parsable_strings.at(i);
+            if(!string_received.empty())
             {
                 parseServerMsg();
                 parseMsg();
@@ -396,7 +403,7 @@ void Bot::discon()
 
 void Bot::join_c()
 {
-    if(s_msg_struct.nick == Dyrand)
+    if(s_msg_struct.nickname == Dyrand)
     {
         for(unsigned int i(0);  i < msg_struct.args.size(); i++)
         {join(msg_struct.args.at(i));}
@@ -405,7 +412,7 @@ void Bot::join_c()
 
 void Bot::part_c()
 {
-    if(s_msg_struct.nick == Dyrand)
+    if(s_msg_struct.nickname == Dyrand)
     {
         for(unsigned int i(0);  i < msg_struct.args.size(); i++)
         {part(msg_struct.args.at(i));}
@@ -414,18 +421,18 @@ void Bot::part_c()
 
 void Bot::rawInput()
 {
-    if(s_msg_struct.nick == Dyrand)
+    if(s_msg_struct.nickname == Dyrand)
     {send(msg_struct.postfix);}
     else
-    {privmsg(s_msg_struct.msg_target,"\1ACTION tells "+s_msg_struct.nick+" that the \">>\" command is only for: "+Dyrand+".\1");}
+    {privmsg(s_msg_struct.msg_target,"\1ACTION tells "+s_msg_struct.nickname+" that the \">>\" command is only for: "+Dyrand+".\1");}
 }
 
 
 
 /*  Get Functions for Bot class */
 
-std::string Bot::getNick()
-{return nick;}
+std::string Bot::getNickname()
+{return nickname;}
 
 void Bot::getMsgStructs(serverMsgStruct& s_msg_struct_t, msgStruct& msg_struct_t)
 {
