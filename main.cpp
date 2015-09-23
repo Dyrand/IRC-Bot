@@ -2,11 +2,11 @@
 
 #include "Bot.hpp"
 
-int main(int argc, *char[] argv)
+int main(int argc, char *argv[])
 {
     Bot bot;
 
-    if(bot.connectServer()==sf::Socket::Done)
+    if(bot.connectToServer()==sf::Socket::Done)
     {
         bot.registerConnection();
         bot.join();

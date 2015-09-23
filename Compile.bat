@@ -1,0 +1,2 @@
+g++ -std=c++11 -c serverMessageStruct.cpp ircMimic.cpp TcpSocket.cpp Bot.cpp main.cpp -I/Libraries/C++/SFML-2.3-source/include 2> text1.txt
+g++ -Wall serverMessageStruct.o Bot.o ircMimic.o TcpSocket.o main.o -o irc_bot -L/Libraries/C++/SFML-2.3-build/lib -lsfml-network -lsfml-system 2> text2.txt

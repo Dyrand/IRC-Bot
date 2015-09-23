@@ -3,6 +3,7 @@
 
 #include <SFML/Network.hpp>
 
+#include "TcpSocket.hpp"
 #include "serverMessageStruct.hpp"
 #include "ircMimic.hpp"
 
@@ -15,25 +16,22 @@ class Bot
 
         Bot();
 
-        //Establishing Connections
-        int connectServer(std::string server_t, int port_t);
-        int connectServer();
-        void registerConnection(std::string connection_password_t, std::string nickname_t, std::string username_t, std::string realname_t);
+        //Connection establishers
+        sf::Socket::Status connectToServer(std::string serverName_t, short int port_t);
+        sf::Socket::Status connectToServer();
+        void registerConnection(std::string connection_password_t, std::string nickname_t, std::string username_t, std::string realname_t, std::string mode);
         void registerConnection();
 
-        //Outputs text depending on what status is
-        int updateStatus(sf::Socket::Status status_t);
-        int outputStatus();
-
         //Send and Receive
-        void send(std::string formated_text);
+        sf::Socket::Status send(std::string formated_text);
         void receive();
 
         //Basic IRC commands
-        void privmsg(std::string channel_t, std::string send_msg_t);
-        void privmsg(std::string msg_t);
+        void privmsg(std::string channel_t, std::string sendMessage_t);
+        void privmsg(std::string sendMessage_t);
         void join(std::string channel_t);
         void join();
+        void part(std::string channel_t, std::string sendMessage_t);
         void part(std::string channel_t);
         void quit(std::string msg_t);
         void quit();
@@ -68,8 +66,9 @@ class Bot
         msgStruct         msg_struct; //message_struct
 
         bool stay_connected;
+        sf::Time maxTimeToWait;
 
-        long unsigned int bytes_rec;
+        std::size_t bytes_rec;
         std::array<char,512> text_received;
         std::vector<std::string> parsable_strings;
         std::string string_received;
@@ -87,21 +86,21 @@ class Bot
         size_t excl_pos  = std::string::npos; // "!"
         size_t at_pos    = std::string::npos; // "@"
 
-        sf::Socket::Status status;
-        sf::TcpSocket      socket;
+        TcpSocket socket;
         
-        std::string connection_password;
+        std::string connectionPassword;
         std::string nickname;
         std::string user;
         std::string realname;
         std::string mode;
 
-        std::string send_message;
-        std::string target_channel;
+        std::string quitMessage;
+        std::string sendMessage;
+        std::string targetChannel;
         std::string channel;
-        std::string target_server;
+        std::string targetServer;
         std::string server;
-        int target_port;
+        unsigned short targetPort;
 
         //Dyrand
         const std::string Dyrand = "Dyrand";
@@ -110,4 +109,3 @@ class Bot
 
 
 #endif // BOT_CLASS_HPP
-

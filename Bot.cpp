@@ -5,104 +5,68 @@
 
 #include <SFML/Network.hpp>
 
+#include "TcpSocket.hpp"
 #include "Bot.hpp"
 #include "serverMessageStruct.hpp"
 
 
 Bot::Bot():
     mimic_o(this),
-    stay_connected(true),
-    connection_password("password"),
-    nickname("Dyramica"),
-    user("dyramic"),
-    real("dyramic"),
+    maxTimeToWait(sf::seconds(5)),
+    connectionPassword("password"),
+    nickname("Dyramic"),
+    user("DyrBot"),
+    realname("DyrBot"),
     mode("0"),
-    target_channel("botdever"),
-    target_server("irc.freenode.com"),
-    target_port(8001)
+    quitMessage("gotta go fast!"),
+    targetChannel("#botdever"),
+    targetServer("irc.freenode.com"),
+    targetPort(8001)
 {}
 
-int Bot::connectServer(std::string server_t, int port_t)
+sf::Socket::Status Bot::connectToServer(std::string serverName_t, short int port_t)
 {
-    target_server = server_t;
-    target_port   = port_t;
-    return connectServer();
+    targetServer = serverName_t;
+    targetPort   = port_t;
+    return connectToServer();
 }
 
-int Bot::connectServer()
+sf::Socket::Status Bot::connectToServer()
 {
-    updateStatus(socket.connect(target_server,target_port));
-    return outputStatus();
+    return socket.connect(targetServer,targetPort,maxTimeToWait);
 }
 
-void Bot::registerConnection(std::string connection_password_t, std::string nickname_t, std::string user_t, std::string realname_t)
+void Bot::registerConnection(std::string connectionPassword_t, std::string nickname_t, std::string user_t, std::string realname_t, std::string mode_t = "0")
 {
-    connection_password = connection_password_t;
+    connectionPassword = connectionPassword_t;
     nickname = nickname_t;
     user = user_t;
     realname = realname_t;
+    mode = mode_t;
     registerConnection();
 }
 
 void Bot::registerConnection()
 {
-    send("PASS "+connection_password);
+    send("PASS "+connectionPassword);
     send("NICK "+nickname);
     send("USER "+user+" "+mode+" * :"+realname);
 }
 
-int Bot::updateStatus(sf::Socket::Status status_t)
+sf::Socket::Status Bot::send(std::string sendMessage_t)
 {
-    status = status_t;
-    return outputStatus();
+    sendMessage = sendMessage_t;
+    sendMessage.append("\r\n");
+    std::cout << sendMessage;
+    return socket.send(sendMessage.c_str(),sendMessage.size());
 }
 
-int Bot::outputStatus()
-{
-    if(isStatusOutputOpen)
-    {
-        switch(status)
-        {
-        case sf::Socket::Done:
-            std::cout << "Connection to " << server << " done.\n";
-            return sf::Socket::Done;
-        break;
-    
-        case sf::Socket::NotReady:
-            std::cout << "Connection to " << server << "not ready.\n";
-            return sf::Socket::NotReady;
-        break;
-    
-        case sf::Socket::Disconnected:
-            std::cout << "Disconnected from " << server << ".\n";
-            return sf::Socket::Disconnected;
-        break;
-    
-        case sf::Socket::Error:
-        
-        default:
-            std::cout << "Error connecting to " << server << ".\n";
-            return sf::Socket::Error;
-        break;
-        }
-    }
-}
-
-int Bot::send(std::string send_message_t)
-{
-    send_message = send_message_t;
-    send_message.append("\r\n");
-    std::cout << send_message;
-    updateStatus(socket.send(send_message.c_str(),send_message.size());
-    return status;
-}
-
-//Using A TCPsocket, divide a message based on "\r\n" position, messages without a "\r\n" at the end is regarded as
-//a partial string and saved for combining
+//Using A TCPsocket, divides a message based on "\r\n" position, messages without a "\r\n" at the end are regarded as
+//partial strings and are saved for recombining
 void Bot::receive()
 {
-    updateStatus(socket.receive(text_received.data(),text_received.size(),bytes_rec));
-    recieve_string.assign(text_received.begin(),text_received.begin()+bytes_rec);
+    socket.receive(text_received.data(),text_received.size(),bytes_rec);
+    string_received.assign(text_received.begin(),text_received.begin()+bytes_rec);
 
     //Appends one partial strings to another
     rn_pos = string_received.find("\r\n");
@@ -118,7 +82,7 @@ void Bot::receive()
     //Split strings on "\r\n" positions and removes characters until there is no "\r\n" left
     while((rn_pos = string_received.find("\r\n")) != string_received.npos)
     {
-        temp_string = string_received.substr(0,rn_pos+2)
+        temp_string = string_received.substr(0,rn_pos+2);
         parsable_strings.emplace_back(temp_string);
         string_received.erase(0,rn_pos+2);
     }
@@ -134,26 +98,35 @@ void Bot::receive()
     text_received.fill('\0');
 }
 
-void Bot::privmsg(std::string channel_t, std::string send_message_t)
+void Bot::privmsg(std::string channel_t, std::string sendMessage_t)
 {
-    target_channel = channel_t;
-    privmsg(send_message_t);
+    targetChannel = channel_t;
+    privmsg(sendMessage_t);
 }
 
-void Bot::privmsg(std::string send_message_t)
+void Bot::privmsg(std::string sendMessage_t)
 {
-    send_message = send_message_t;
-    send("PRIVMSG "+target_channel+" :"+send_message);
+    sendMessage = sendMessage_t;
+    send("PRIVMSG "+targetChannel+" :"+sendMessage);
 }
 
 void Bot::join(std::string channel_t)
 {
-    target_channel = channel_t;
+    targetChannel = channel_t;
     join();
 }
 
 void Bot::join()
-{send("JOIN "+target_channel);}
+{
+    send("JOIN "+targetChannel);
+}
+
+void Bot::part(std::string channel_t, std::string sendMessage_t)
+{
+    channel = channel_t;
+    sendMessage = sendMessage_t;
+    send("PART "+channel+" :"+sendMessage);
+}
 
 void Bot::part(std::string channel_t)
 {
@@ -161,15 +134,15 @@ void Bot::part(std::string channel_t)
     send("PART "+channel);
 }
 
-void Bot::quit(std::string send_message_t)
+void Bot::quit(std::string sendMessage_t)
 {
-    send_message = send_message_t;
-    send("QUIT "+send_message);
+    sendMessage = sendMessage_t;
+    send("QUIT "+sendMessage);
 }
 
 void Bot::quit()
 {
-    send("QUIT gotta go fast!");
+    send("QUIT :"+quitMessage);
 }
 
 
@@ -397,7 +370,7 @@ void Bot::loop()
 
 void Bot::discon()
 {
-    if(s_msg_struct.nick == Dyrand)
+    if(s_msg_struct.nickname == Dyrand)
     {stay_connected = false;}
 }
 

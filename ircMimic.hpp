@@ -45,8 +45,8 @@ class ircMimic
         int demim_all = 0;
 
 
-        std::vector<std::string> nicks_mimic; //nicknames that are being mimiced
-        std::map<std::string,user_flags> nick_map;
+        std::vector<std::string> nicknames_mimic; //nicknames that are being mimiced
+        std::map<std::string,user_flags> nickname_map;
 
 };
 
