@@ -28,3 +28,5 @@
 *.layout
 *.depend
 *.cbp
+#Plain text
+*.txt
