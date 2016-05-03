@@ -6,10 +6,10 @@
 class TcpSocket: public sf::TcpSocket
 {
 	public:
-		enum class StatusType 
+		enum class StatusType
 		{
-			Connect, 
-			Send, 
+			Connect,
+			Send,
 			Receive
 		};
 
@@ -19,6 +19,7 @@ class TcpSocket: public sf::TcpSocket
 			currentStatusType(currentStatusType_t)
 		{}
 		sf::Socket::Status connect(const sf::IpAddress &remoteAddress, unsigned short remotePort, sf::Time timeout);
+		sf::Socket::Status connect(const sf::IpAddress &remoteAddress, unsigned short remotePort, int timeout);
 		sf::Socket::Status send(const void *data, std::size_t size);
 		sf::Socket::Status send(const void *data, std::size_t size, std::size_t &sent);
 		sf::Socket::Status receive(void *data, std::size_t size, std::size_t &received);

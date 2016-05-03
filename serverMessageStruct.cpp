@@ -13,7 +13,6 @@ serverMsgStruct& serverMsgStruct::operator=(serverMsgStruct temp)
     msg_target = temp.msg_target;
     prefix_end_pos = temp.prefix_end_pos;
     msg_start_pos  = temp.msg_start_pos;
-    nickname_flag = temp.nickname_flag;
 
     return *this;
 }
@@ -31,13 +30,6 @@ void serverMsgStruct::reset()
     msg_target.clear();
     prefix_end_pos = std::string::npos;
     msg_start_pos  = std::string::npos;
-    nickname_flag = false;
-}
-
-void serverMsgStruct::adjust_channel()
-{
-    if(nickname_flag)
-    {msg_target = nickname;}
 }
 
 msgStruct& msgStruct::operator=(msgStruct temp)

@@ -3,7 +3,7 @@
 #include <SFML/network.hpp>
 #include "TcpSocket.hpp"
 
-sf::Socket::Status TcpSocket::connect(const sf::IpAddress &remoteAddress, unsigned short remotePort, sf::Time timeout = sf::Time::Zero)
+sf::Socket::Status TcpSocket::connect(const sf::IpAddress &remoteAddress, unsigned short remotePort, sf::Time timeout = sf::seconds(5))
 {
 	currentStatus = sf::TcpSocket::connect(remoteAddress,remotePort,timeout);
 	currentStatusType = StatusType::Connect;
@@ -15,16 +15,27 @@ sf::Socket::Status TcpSocket::connect(const sf::IpAddress &remoteAddress, unsign
 	return currentStatus;
 }
 
+
+sf::Socket::Status TcpSocket::connect(const sf::IpAddress &remoteAddress, unsigned short remotePort, int timeout)
+{
+	return connect(remoteAddress,remotePort,sf::seconds(timeout));
+}
+
+
 sf::Socket::Status TcpSocket::send(const void *data, std::size_t size)
 {
 	currentStatus = sf::TcpSocket::send(data,size);
 	currentStatusType = StatusType::Send;
 
 	if(debugMode)
-	{outputStatus();}
+	{
+		outputStatus();
+		std::cout << "(DATA) " << (const char*)data << "\n";
+	}
 
 	return currentStatus;
 }
+
 
 sf::Socket::Status TcpSocket::send(const void *data, std::size_t size, std::size_t &sent)
 {
@@ -32,10 +43,14 @@ sf::Socket::Status TcpSocket::send(const void *data, std::size_t size, std::size
 	currentStatusType = StatusType::Send;
 
 	if(debugMode)
-	{outputStatus();}
+	{
+		outputStatus();
+		std::cout << "(DATA) " << (const char*)data << "\n";
+	}
 
 	return currentStatus;
 }
+
 
 sf::Socket::Status TcpSocket::receive(void *data, std::size_t size, std::size_t &received)
 {
@@ -78,9 +93,7 @@ sf::Socket::Status TcpSocket::getCurrentStatus()
 bool TcpSocket::setDebugMode(bool mode)
 {
 	if(mode == debugMode)
-	{
-		return false;
-	}
+	{ return false; }
 
 	debugMode = mode;
 	return true;
@@ -96,19 +109,19 @@ void TcpSocket::outputStatus()
         case sf::Socket::Done:
             std::cout << "Connection to " << server.toString() << " done.\n";
         break;
-    
+
         case sf::Socket::NotReady:
             std::cout << "Connection to " << server.toString() << " not ready.\n";
         break;
-    	
-   		case sf::Socket::Partial:
-   			std::cout << "The TCP socket sent a part of the data.\n";
-   		break;
+
+	   		case sf::Socket::Partial:
+	   				std::cout << "The TCP socket has partially connected to " << server.toString() << ".\n";
+	   		break;
 
         case sf::Socket::Disconnected:
-            std::cout << "The TCP socket has been disconnected.\n";
+            std::cout << "The TCP socket has been disconnected from " << server.toString() << "\n";
         break;
-    
+
         case sf::Socket::Error:
         default:
             std::cout << "Error connecting to " << server.toString() << ".\n";
@@ -123,19 +136,19 @@ void TcpSocket::outputStatus()
         case sf::Socket::Done:
             std::cout << "The socket has sent the data.\n";
         break;
-    
+
         case sf::Socket::NotReady:
             std::cout << "The socket is not ready to send the data yet.\n";
         break;
-    	
-   		case sf::Socket::Partial:
-   			std::cout << "The TCP socket sent a part of the data.\n";
-   		break;
+
+	   		case sf::Socket::Partial:
+	   			std::cout << "The TCP socket sent a part of the data.\n";
+	   		break;
 
         case sf::Socket::Disconnected:
             std::cout << "The TCP socket has been disconnected.\n";
         break;
-    
+
         case sf::Socket::Error:
         default:
             std::cout << "An unexpected error happened.\n";
@@ -150,19 +163,19 @@ void TcpSocket::outputStatus()
         case sf::Socket::Done:
             std::cout << "The socket has received the data.\n";
         break;
-    
+
         case sf::Socket::NotReady:
             std::cout << "The socket is not ready to receive the data yet.\n";
         break;
-    	
-   		case sf::Socket::Partial:
-   			std::cout << "The TCP socket received a part of the data.\n";
-   		break;
+
+	   		case sf::Socket::Partial:
+	   			std::cout << "The TCP socket received a part of the data.\n";
+	   		break;
 
         case sf::Socket::Disconnected:
             std::cout << "The TCP socket has been disconnected.\n";
         break;
-    
+
         case sf::Socket::Error:
         default:
             std::cout << "An unexpected error happened.\n";
